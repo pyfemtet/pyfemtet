@@ -105,7 +105,7 @@
     <span class="s1">&#39;SubFidelityModel&#39;</span><span class="p">,</span>
     <span class="s1">&#39;SubFidelityModels&#39;</span><span class="p">,</span>
     <span class="s1">&#39;_FReturnValue&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;FEMContext&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;OptimizationDataPerFEM&#39;</span><span class="p">,</span>
 <span class="p">]</span>
 
 
@@ -154,13 +154,16 @@
 
 
 <span class="c1"># 最適化問題の情報をストアするクラス。</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">OptimizationDataStore</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OptimizationData</span><span class="p">:</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_problem</span><span class="p">()</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_objectives</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># SurrogateModel で使用</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span> <span class="o">=</span> <span class="n">Objectives</span><span class="p">()</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_problem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span> <span class="o">=</span> <span class="n">VariableManager</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span> <span class="o">=</span> <span class="n">Objectives</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_objectives</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span> <span class="o">=</span> <span class="n">Constraints</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">other_outputs</span> <span class="o">=</span> <span class="n">Functions</span><span class="p">()</span>
 
@@ -171,6 +174,7 @@
             <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Variable</span><span class="p">:</span>
         <span class="n">var</span><span class="p">:</span> <span class="n">Variable</span>
         <span class="c1"># noinspection PyUnreachableCode</span>
@@ -188,7 +192,8 @@
         <span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
         <span class="n">var</span><span class="o">.</span><span class="n">pass_to_fem</span> <span class="o">=</span> <span class="n">pass_to_fem</span>
         <span class="n">var</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="k">if</span> <span class="n">properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
-        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">supress_duplicated_name_check</span><span class="p">:</span>
+            <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">set_variable</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">var</span>
 
@@ -203,6 +208,7 @@
             <span class="o">*</span><span class="p">,</span>
             <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
             <span class="n">fix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NumericParameter</span><span class="p">:</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="k">if</span> <span class="n">properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
 
@@ -217,7 +223,8 @@
         <span class="n">prm</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">step</span>
         <span class="n">prm</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span>
         <span class="n">prm</span><span class="o">.</span><span class="n">pass_to_fem</span> <span class="o">=</span> <span class="n">pass_to_fem</span>
-        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">supress_duplicated_name_check</span><span class="p">:</span>
+            <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">set_variable</span><span class="p">(</span><span class="n">prm</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">prm</span>
 
@@ -228,6 +235,7 @@
             <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExpressionFromString</span><span class="p">:</span>
         <span class="n">var</span> <span class="o">=</span> <span class="n">ExpressionFromString</span><span class="p">()</span>
         <span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
@@ -236,7 +244,8 @@
         <span class="p">)</span>
         <span class="n">var</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="n">var</span><span class="o">.</span><span class="n">pass_to_fem</span> <span class="o">=</span> <span class="n">pass_to_fem</span>
-        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">supress_duplicated_name_check</span><span class="p">:</span>
+            <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">set_variable</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">var</span>
 
@@ -247,13 +256,15 @@
             <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExpressionFromString</span><span class="p">:</span>
         <span class="n">var</span> <span class="o">=</span> <span class="n">ExpressionFromString</span><span class="p">()</span>
         <span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="n">var</span><span class="o">.</span><span class="n">_expr</span> <span class="o">=</span> <span class="n">ExpressionFromString</span><span class="o">.</span><span class="n">InternalClass</span><span class="p">(</span><span class="n">sympy_expr</span><span class="o">=</span><span class="n">sympy_expr</span><span class="p">)</span>
         <span class="n">var</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="n">var</span><span class="o">.</span><span class="n">pass_to_fem</span> <span class="o">=</span> <span class="n">pass_to_fem</span>
-        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">supress_duplicated_name_check</span><span class="p">:</span>
+            <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">set_variable</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">var</span>
 
@@ -266,6 +277,7 @@
             <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExpressionFromFunction</span><span class="p">:</span>
         <span class="n">var</span> <span class="o">=</span> <span class="n">ExpressionFromFunction</span><span class="p">()</span>
         <span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
@@ -274,7 +286,8 @@
         <span class="n">var</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="n">var</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="n">var</span><span class="o">.</span><span class="n">pass_to_fem</span> <span class="o">=</span> <span class="n">pass_to_fem</span>
-        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">supress_duplicated_name_check</span><span class="p">:</span>
+            <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">set_variable</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">var</span>
 
@@ -287,6 +300,7 @@
             <span class="o">*</span><span class="p">,</span>
             <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
             <span class="n">fix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CategoricalParameter</span><span class="p">:</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="k">if</span> <span class="n">properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
 
@@ -299,7 +313,8 @@
         <span class="n">prm</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">choices</span>
         <span class="n">prm</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">properties</span>
         <span class="n">prm</span><span class="o">.</span><span class="n">pass_to_fem</span> <span class="o">=</span> <span class="n">pass_to_fem</span>
-        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">supress_duplicated_name_check</span><span class="p">:</span>
+            <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">set_variable</span><span class="p">(</span><span class="n">prm</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">prm</span>
 
@@ -310,6 +325,7 @@
             <span class="n">direction</span><span class="p">:</span> <span class="n">DIRECTION</span> <span class="o">=</span> <span class="s1">&#39;minimize&#39;</span><span class="p">,</span>
             <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Objective</span><span class="p">:</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="n">Objective</span><span class="p">()</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">fun</span> <span class="o">=</span> <span class="n">fun</span>
@@ -317,7 +333,8 @@
         <span class="n">obj</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="n">direction</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">fem_ctx</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">supress_duplicated_name_check</span><span class="p">:</span>
+            <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">obj</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">obj</span>  <span class="c1"># Context で fem_ctx をセットするために返す</span>
 
@@ -329,6 +346,7 @@
             <span class="n">directions</span><span class="p">:</span> <span class="n">DIRECTION</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DIRECTION</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Objective</span><span class="p">]:</span>
         <span class="c1"># argument processing</span>
         <span class="c1"># noinspection PyUnreachableCode</span>
@@ -364,6 +382,7 @@
                 <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">,</span>
                 <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
                 <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
+                <span class="n">supress_duplicated_name_check</span><span class="o">=</span><span class="n">supress_duplicated_name_check</span><span class="p">,</span>
             <span class="p">))</span>
 
         <span class="k">return</span> <span class="n">out</span>
@@ -378,6 +397,7 @@
             <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
             <span class="n">using_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Constraint</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">lower_bound</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">upper_bound</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
@@ -396,7 +416,8 @@
         <span class="n">cns</span><span class="o">.</span><span class="n">hard</span> <span class="o">=</span> <span class="n">strict</span>
         <span class="n">cns</span><span class="o">.</span><span class="n">fem_ctx</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">cns</span><span class="o">.</span><span class="n">using_fem</span> <span class="o">=</span> <span class="n">using_fem</span>
-        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">supress_duplicated_name_check</span><span class="p">:</span>
+            <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">cns</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">cns</span>  <span class="c1"># Context で fem_ctx をセットするために返す</span>
 
@@ -406,21 +427,22 @@
             <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
             <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-
         <span class="n">other_func</span> <span class="o">=</span> <span class="n">Function</span><span class="p">()</span>
         <span class="n">other_func</span><span class="o">.</span><span class="n">fun</span> <span class="o">=</span> <span class="n">fun</span>
         <span class="n">other_func</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span> <span class="ow">or</span> <span class="p">()</span>
         <span class="n">other_func</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="n">other_func</span><span class="o">.</span><span class="n">fem_ctx</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">other_outputs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">supress_duplicated_name_check</span><span class="p">:</span>
+            <span class="n">_duplicated_name_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">other_outputs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">other_outputs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">other_func</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">other_func</span>
 
 
 <span class="c1"># 最適化問題の関数を FEM ごとに管理して</span>
 <span class="c1"># 実行制御とかを行うクラス</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">FEMContext</span><span class="p">(</span><span class="n">OptimizationDataStore</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OptimizationDataPerFEM</span><span class="p">(</span><span class="n">OptimizationData</span><span class="p">):</span>
 
     <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span>
 
@@ -432,14 +454,13 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_initialize_problem</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_done_load_problem_from_fem</span> <span class="o">=</span> <span class="kc">False</span>
 
+    <span class="c1"># TODO: Constraint が using_fem check を使うためだけにこの実装は過剰。</span>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_with_add_fem_ctx</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="k">def</span><span class="w"> </span><span class="nf">add_fem_ctx</span><span class="p">(</span><span class="n">something</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">something</span><span class="p">,</span> <span class="n">Function</span><span class="p">):</span>
                     <span class="n">something</span><span class="o">.</span><span class="n">fem_ctx</span> <span class="o">=</span> <span class="bp">self</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">something</span><span class="p">,</span> <span class="n">Variable</span><span class="p">):</span>
-                    <span class="n">something</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;fem_ctx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
 
             <span class="n">out</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">):</span>
@@ -462,6 +483,7 @@
         <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">using_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
@@ -472,6 +494,7 @@
             <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">,</span>
             <span class="n">using_fem</span><span class="o">=</span><span class="n">using_fem</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="o">=</span><span class="n">supress_duplicated_name_check</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="nd">@_with_add_fem_ctx</span>
@@ -482,6 +505,7 @@
             <span class="n">direction</span><span class="p">:</span> <span class="n">DIRECTION</span> <span class="o">=</span> <span class="s1">&#39;minimize&#39;</span><span class="p">,</span>
             <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Objective</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
@@ -489,6 +513,7 @@
             <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">,</span>
             <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
             <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="o">=</span><span class="n">supress_duplicated_name_check</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="nd">@_with_add_fem_ctx</span>
@@ -500,6 +525,7 @@
             <span class="n">directions</span><span class="p">:</span> <span class="n">DIRECTION</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DIRECTION</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Objective</span><span class="p">]:</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_objectives</span><span class="p">(</span>
             <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">,</span>
@@ -508,6 +534,7 @@
             <span class="n">directions</span><span class="o">=</span><span class="n">directions</span><span class="p">,</span>
             <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
             <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="o">=</span><span class="n">supress_duplicated_name_check</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="nd">@_with_add_fem_ctx</span>
@@ -517,12 +544,14 @@
             <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
             <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_other_output</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">fun</span><span class="o">=</span><span class="n">fun</span><span class="p">,</span>
             <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
             <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="o">=</span><span class="n">supress_duplicated_name_check</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_y_common</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TrialOutput</span><span class="p">:</span>
@@ -571,39 +600,76 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_other_outputs_common</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_problem_from_fem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_load_problem_from_fem</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_done_load_problem_from_fem</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">load_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">load_objectives</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">load_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_done_load_problem_from_fem</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">load_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">load_objectives</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">load_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 
-<span class="c1"># AbstractOptimizer が使う前提の、意味的にわかりやすい、</span>
-<span class="c1"># 既存コードとの互換性を持った、</span>
-<span class="c1"># fem が MultipleFEMInterface であることを</span>
-<span class="c1"># 特徴とするクラス</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">FEMGlobal</span><span class="p">(</span><span class="n">FEMContext</span><span class="p">):</span>
-    <span class="n">_fems</span><span class="p">:</span> <span class="n">MultipleFEMInterface</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FEMListForGlobal</span><span class="p">(</span><span class="n">FEMListInterface</span><span class="p">):</span>
+
+    <span class="c1"># 単一 FEM しか使わない場合に list を意識させないため</span>
+    <span class="c1"># 長さ 1 の時は要素を返す処理が方々で必要</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_pass_to_fun</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">object_pass_to_fun</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">out</span>
+
+    <span class="c1"># GlobalOptimizationData が これらを操作すると二重操作になる。</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">TrialInput</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_param_and_raise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prm_name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># ユーザーが操作できないようにする</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Invalid operation. Use `AbstractOptimizer.fem_manager.append` instead.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">):</span>
+        <span class="n">FEMListInterface</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">)</span>
+
+
+<span class="c1"># 特定の FEM に紐づかない最適化問題データを管理する</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GlobalOptimizationData</span><span class="p">(</span><span class="n">OptimizationDataPerFEM</span><span class="p">):</span>
+    <span class="n">fem</span><span class="p">:</span> <span class="n">FEMListForGlobal</span>
+
+
+<span class="c1"># 特定の FEM とそれに紐づく最適化問題データを管理する</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FEMAndDataConnectionManager</span><span class="p">:</span>
+    <span class="n">_contexts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">OptimizationDataPerFEM</span><span class="p">]</span>
+    <span class="n">_fems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AbstractFEMInterface</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span> <span class="o">=</span> <span class="n">FEMListForGlobal</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_data</span> <span class="o">=</span> <span class="n">GlobalOptimizationData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_contexts</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">fem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AbstractFEMInterface</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fems</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">AbstractFEMInterface</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">)</span>
 
-    <span class="nd">@fem</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">fem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">MultipleFEMInterface</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span> <span class="o">=</span> <span class="n">MultipleFEMInterface</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">contexts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">OptimizationDataPerFEM</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contexts</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">global_data</span><span class="p">])</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OptimizationDataPerFEM</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fem</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span><span class="o">.</span><span class="n">_append</span><span class="p">(</span><span class="n">fem</span><span class="p">)</span>
+        <span class="n">ctx</span> <span class="o">=</span> <span class="n">OptimizationDataPerFEM</span><span class="p">(</span><span class="n">fem</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_contexts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ctx</span>
 
 
 <div class="viewcode-block" id="AbstractOptimizer">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">AbstractOptimizer</span><span class="p">(</span><span class="n">OptimizationDataStore</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AbstractOptimizer</span><span class="p">(</span><span class="n">OptimizationData</span><span class="p">):</span>
 
     <span class="c1"># optimize</span>
     <span class="n">n_trials</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span>
@@ -640,7 +706,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sub_fidelity_models</span> <span class="o">=</span> <span class="n">SubFidelityModels</span><span class="p">()</span>
 
         <span class="c1"># System</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fem_global</span> <span class="o">=</span> <span class="n">FEMGlobal</span><span class="p">(</span><span class="n">MultipleFEMInterface</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span> <span class="o">=</span> <span class="n">FEMAndDataConnectionManager</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">:</span> <span class="n">History</span> <span class="o">=</span> <span class="n">History</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">solve_condition</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">History</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">termination_condition</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">History</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="kc">False</span>
@@ -653,30 +719,37 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_worker_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">fem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AbstractFEMInterface</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem_global</span><span class="o">.</span><span class="n">fem</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AbstractFEMInterface</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">AbstractFEMInterface</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">fems</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">AbstractFEMInterface</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">fems</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fems</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fems</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fems</span>
 
     <span class="nd">@fem</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fem_global</span><span class="o">.</span><span class="n">fem</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="c1"># FEMList は初期化しつつ、</span>
+        <span class="c1"># global_data は初期化しないようにする</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span> <span class="o">=</span> <span class="n">FEMListForGlobal</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">global_data</span><span class="o">.</span><span class="n">fem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">fems</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultipleFEMInterface</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem_global</span><span class="o">.</span><span class="n">_fems</span>
+<div class="viewcode-block" id="AbstractOptimizer.add_fem">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_fem">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_fem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OptimizationDataPerFEM</span><span class="p">:</span>
+        <span class="n">show_experimental_warning</span><span class="p">(</span><span class="s1">&#39;add_fem&#39;</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fem</span><span class="p">)</span></div>
 
-    <span class="nd">@fems</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">fems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">MultipleFEMInterface</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fem_global</span><span class="o">.</span><span class="n">_fems</span> <span class="o">=</span> <span class="n">value</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_append_fem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">):</span>
-        <span class="n">show_experimental_warning</span><span class="p">(</span><span class="s1">&#39;AbstractOptimizer._append_fem&#39;</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fem_global</span><span class="o">.</span><span class="n">_fems</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fem</span><span class="p">)</span>
+    <span class="c1"># @property</span>
+    <span class="c1"># def global_data(self) -&gt; GlobalOptimizationData:</span>
+    <span class="c1">#     return self.fem_manager.global_data</span>
 
     <span class="c1"># ===== public =====</span>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_dispatch_no_fem_context_data_store_method</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_dispatch_global_data_store</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-            <span class="n">instance</span><span class="p">:</span> <span class="n">FEMGlobal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem_global</span>
+            <span class="n">instance</span><span class="p">:</span> <span class="n">GlobalOptimizationData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">global_data</span>
             <span class="n">method_name</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="vm">__name__</span>
             <span class="n">method</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
                 <span class="n">instance</span><span class="p">,</span>
@@ -690,7 +763,7 @@
 
 <div class="viewcode-block" id="AbstractOptimizer.add_constant_value">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_constant_value">[docs]</a>
-    <span class="nd">@_dispatch_no_fem_context_data_store_method</span>
+    <span class="nd">@_dispatch_global_data_store</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_constant_value</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -698,13 +771,14 @@
             <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="AbstractOptimizer.add_parameter">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_parameter">[docs]</a>
-    <span class="nd">@_dispatch_no_fem_context_data_store_method</span>
+    <span class="nd">@_dispatch_global_data_store</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_parameter</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -716,13 +790,14 @@
             <span class="o">*</span><span class="p">,</span>
             <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
             <span class="n">fix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="AbstractOptimizer.add_expression_string">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_expression_string">[docs]</a>
-    <span class="nd">@_dispatch_no_fem_context_data_store_method</span>
+    <span class="nd">@_dispatch_global_data_store</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_expression_string</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -730,13 +805,14 @@
             <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="AbstractOptimizer.add_expression_sympy">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_expression_sympy">[docs]</a>
-    <span class="nd">@_dispatch_no_fem_context_data_store_method</span>
+    <span class="nd">@_dispatch_global_data_store</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_expression_sympy</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -744,13 +820,14 @@
             <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="AbstractOptimizer.add_expression">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_expression">[docs]</a>
-    <span class="nd">@_dispatch_no_fem_context_data_store_method</span>
+    <span class="nd">@_dispatch_global_data_store</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_expression</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -760,13 +837,14 @@
             <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="AbstractOptimizer.add_categorical_parameter">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_categorical_parameter">[docs]</a>
-    <span class="nd">@_dispatch_no_fem_context_data_store_method</span>
+    <span class="nd">@_dispatch_global_data_store</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_categorical_parameter</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -776,13 +854,14 @@
             <span class="o">*</span><span class="p">,</span>
             <span class="n">pass_to_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
             <span class="n">fix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="AbstractOptimizer.add_objective">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_objective">[docs]</a>
-    <span class="nd">@_dispatch_no_fem_context_data_store_method</span>
+    <span class="nd">@_dispatch_global_data_store</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_objective</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -790,13 +869,14 @@
             <span class="n">direction</span><span class="p">:</span> <span class="n">DIRECTION</span> <span class="o">=</span> <span class="s1">&#39;minimize&#39;</span><span class="p">,</span>
             <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="AbstractOptimizer.add_objectives">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_objectives">[docs]</a>
-    <span class="nd">@_dispatch_no_fem_context_data_store_method</span>
+    <span class="nd">@_dispatch_global_data_store</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_objectives</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">names</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
@@ -805,13 +885,14 @@
             <span class="n">directions</span><span class="p">:</span> <span class="n">DIRECTION</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DIRECTION</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="AbstractOptimizer.add_constraint">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_constraint">[docs]</a>
-    <span class="nd">@_dispatch_no_fem_context_data_store_method</span>
+    <span class="nd">@_dispatch_global_data_store</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_constraint</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -822,19 +903,21 @@
             <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
             <span class="n">using_fem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="AbstractOptimizer.add_other_output">
 <a class="viewcode-back" href="../../../../modules/pyfemtet.opt.optimizer.html#pyfemtet.opt.optimizer.AbstractOptimizer.add_other_output">[docs]</a>
-    <span class="nd">@_dispatch_no_fem_context_data_store_method</span>
+    <span class="nd">@_dispatch_global_data_store</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_other_output</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="n">fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
             <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">supress_duplicated_name_check</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">pass</span></div>
 
@@ -982,7 +1065,7 @@
         <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_FReturnValue</span><span class="p">:</span>
             <span class="c1"># create context</span>
             <span class="k">if</span> <span class="n">history</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">record_to_history</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">recording</span><span class="p">(</span><span class="n">opt_</span><span class="o">.</span><span class="n">fem_global</span><span class="o">.</span><span class="n">_fems</span><span class="p">)</span>
+                <span class="n">record_to_history</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">recording</span><span class="p">(</span><span class="n">opt_</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">fems</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
 
                 <span class="k">class</span><span class="w"> </span><span class="nc">DummyRecordContext</span><span class="p">:</span>
@@ -999,12 +1082,12 @@
 
                 <span class="c1"># noinspection PyMethodParameters</span>
                 <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="n">self_</span><span class="p">):</span>
-                    <span class="n">opt_</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">trial_preprocess_per_fidelity</span><span class="p">()</span>
+                    <span class="n">opt_</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span><span class="o">.</span><span class="n">trial_postprocess_per_fidelity</span><span class="p">()</span>
                     <span class="k">return</span> <span class="n">self_</span>
 
                 <span class="c1"># noinspection PyMethodParameters</span>
                 <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="n">self_</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
-                    <span class="n">opt_</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">trial_postprocess_per_fidelity</span><span class="p">()</span>
+                    <span class="n">opt_</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span><span class="o">.</span><span class="n">trial_postprocess_per_fidelity</span><span class="p">()</span>
 
             <span class="c1"># processing with recording</span>
             <span class="c1"># postprocess_after_recording より後に trial_postprocess を</span>
@@ -1015,7 +1098,7 @@
                 <span class="n">empty_other_outputs</span><span class="p">:</span> <span class="n">TrialFunctionOutput</span> <span class="o">=</span> <span class="n">TrialFunctionOutput</span><span class="p">()</span>
                 <span class="n">empty_y</span> <span class="o">=</span> <span class="n">TrialOutput</span><span class="p">()</span>
                 <span class="c1"># (Required for direction recording to graph even if the value is nan)</span>
-                <span class="k">for</span> <span class="n">ctx</span><span class="p">,</span> <span class="n">__</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">opt_</span><span class="o">.</span><span class="n">_ordered_contexts</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">ctx</span> <span class="ow">in</span> <span class="n">opt_</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">contexts</span><span class="p">:</span>
                     <span class="n">empty_y</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
                         <span class="n">obj_name</span><span class="p">:</span> <span class="n">ObjectiveResult</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">ctx</span><span class="o">.</span><span class="n">fem</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">))</span>
                         <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">ctx</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
@@ -1039,26 +1122,34 @@
                     <span class="n">record</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">TrialState</span><span class="o">.</span><span class="n">skipped</span>
                     <span class="k">raise</span> <span class="n">SkipSolve</span>
 
+                <span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">nullcontext</span>
+
                 <span class="c1"># start solve per FEM</span>
                 <span class="k">if</span> <span class="n">opt_</span><span class="o">.</span><span class="n">sub_fidelity_name</span> <span class="o">!=</span> <span class="n">MAIN_FIDELITY_NAME</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;----------&#39;</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;fidelity: (</span><span class="si">{name}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">opt_</span><span class="o">.</span><span class="n">sub_fidelity_name</span><span class="p">))</span>
-                <span class="k">for</span> <span class="n">ctx</span><span class="p">,</span> <span class="n">update_mode</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">opt_</span><span class="o">.</span><span class="n">_ordered_contexts</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">ctx</span> <span class="ow">in</span> <span class="n">opt_</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">contexts</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;input variables:&#39;</span><span class="p">))</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
 
                     <span class="c1"># ===== update FEM parameter =====</span>
-                    <span class="k">if</span> <span class="n">update_mode</span><span class="o">.</span><span class="n">update_fem</span><span class="p">:</span>
-                        <span class="n">pass_to_fem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span>
+                    <span class="k">with</span> <span class="n">nullcontext</span><span class="p">():</span>
+                        <span class="c1"># 共通</span>
+                        <span class="n">pass_to_fem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">global_data</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span>
                             <span class="nb">filter</span><span class="o">=</span><span class="s2">&quot;pass_to_fem&quot;</span><span class="p">,</span>
                             <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">,</span>
                         <span class="p">)</span>
+                        <span class="c1"># FEM ごとのものを追加</span>
+                        <span class="n">pass_to_fem</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span>
+                            <span class="nb">filter</span><span class="o">=</span><span class="s2">&quot;pass_to_fem&quot;</span><span class="p">,</span>
+                            <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;raw&quot;</span><span class="p">,</span>
+                        <span class="p">))</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;updating variables...&#39;</span><span class="p">))</span>
                         <span class="n">ctx</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="n">pass_to_fem</span><span class="p">)</span>
                         <span class="n">opt_</span><span class="o">.</span><span class="n">_check_and_raise_interruption</span><span class="p">()</span>
 
                     <span class="c1"># ===== evaluate hard constraint =====</span>
-                    <span class="k">if</span> <span class="n">update_mode</span><span class="o">.</span><span class="n">update_function</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="n">nullcontext</span><span class="p">():</span>
                         <span class="n">ctx_hard_c</span> <span class="o">=</span> <span class="n">TrialConstraintOutput</span><span class="p">()</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;evaluating constraint functions...&#39;</span><span class="p">))</span>
 
@@ -1092,7 +1183,7 @@
                             <span class="k">raise</span> <span class="n">HardConstraintViolation</span>
 
                     <span class="c1"># ===== update FEM =====</span>
-                    <span class="k">if</span> <span class="n">update_mode</span><span class="o">.</span><span class="n">update_fem</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="n">nullcontext</span><span class="p">():</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Solving FEM...&#39;</span><span class="p">))</span>
 
                         <span class="k">try</span><span class="p">:</span>
@@ -1115,7 +1206,7 @@
                             <span class="k">raise</span> <span class="n">e</span>
 
                     <span class="c1"># ===== evaluate y =====</span>
-                    <span class="k">if</span> <span class="n">update_mode</span><span class="o">.</span><span class="n">update_function</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="n">nullcontext</span><span class="p">():</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;evaluating objective functions...&#39;</span><span class="p">))</span>
 
                         <span class="k">try</span><span class="p">:</span>
@@ -1139,7 +1230,7 @@
                             <span class="k">raise</span> <span class="n">e</span>
 
                     <span class="c1"># ===== evaluate soft constraint =====</span>
-                    <span class="k">if</span> <span class="n">update_mode</span><span class="o">.</span><span class="n">update_function</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="n">nullcontext</span><span class="p">():</span>
                         <span class="n">ctx_soft_c</span> <span class="o">=</span> <span class="n">TrialConstraintOutput</span><span class="p">()</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;evaluating remaining constraints...&#39;</span><span class="p">))</span>
 
@@ -1160,7 +1251,7 @@
                             <span class="k">raise</span> <span class="n">e</span>
 
                     <span class="c1"># ===== evaluate other functions =====</span>
-                    <span class="k">if</span> <span class="n">update_mode</span><span class="o">.</span><span class="n">update_function</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="n">nullcontext</span><span class="p">():</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;evaluating other functions...&#39;</span><span class="p">))</span>
 
                         <span class="n">ctx_other_outputs</span> <span class="o">=</span> <span class="n">TrialFunctionOutput</span><span class="p">()</span>
@@ -1261,12 +1352,16 @@
 
                 <span class="c1"># noinspection PyMethodParameters</span>
                 <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="n">self_</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">fems</span><span class="o">.</span><span class="n">trial_preprocess</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span><span class="o">.</span><span class="n">trial_preprocess</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">sub_fidelity_models</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                        <span class="n">sub</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span><span class="o">.</span><span class="n">trial_preprocess</span><span class="p">()</span>
                     <span class="k">return</span> <span class="n">self_</span>
 
                 <span class="c1"># noinspection PyMethodParameters</span>
                 <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="n">self_</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">fems</span><span class="o">.</span><span class="n">trial_postprocess</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span><span class="o">.</span><span class="n">trial_postprocess</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">sub_fidelity_models</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                        <span class="n">sub</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span><span class="o">.</span><span class="n">trial_postprocess</span><span class="p">()</span>
 
             <span class="k">with</span> <span class="n">AllFEMPrePostPerTrial</span><span class="p">():</span>
 
@@ -1370,7 +1465,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">initializing</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">launching_fem</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span><span class="o">.</span><span class="n">_setup_after_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">wait_other_process_setup</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">worker_status</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="o">.</span><span class="n">waiting</span>
@@ -1436,30 +1531,24 @@
         <span class="c1"># ctx の内容が減っている場合でも検出できるように初期化</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_problem</span><span class="p">()</span>
 
-        <span class="k">for</span> <span class="n">ctx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem_global</span><span class="o">.</span><span class="n">_fems</span><span class="o">.</span><span class="n">ordered_contexts</span><span class="p">:</span>
-            <span class="c1"># 各 context の fem 特有の問題設定は</span>
-            <span class="c1"># 各 context が読み込む必要がある。</span>
-            <span class="c1"># 直接 fem.load_... を呼んではいけない。</span>
-            <span class="n">ctx</span><span class="o">.</span><span class="n">_load_problem_from_fem</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">ctx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">contexts</span><span class="p">:</span>
+            <span class="c1"># femlist が _load すると各 FEMInterface が</span>
+            <span class="c1"># 想定するのと異なる object_pass_to_fun (=Sequence)が</span>
+            <span class="c1"># 渡されてしまうので、</span>
+            <span class="c1"># 各 context のみが _load_... を行う必要がある。</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">GlobalOptimizationData</span><span class="p">):</span>
+                <span class="n">ctx</span><span class="o">.</span><span class="n">_load_problem_from_fem</span><span class="p">()</span>
 
-            <span class="c1"># さらに、global な最適化問題設定にも反映させる</span>
+            <span class="c1"># optimizer に反映する</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">objectives</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">constraints</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">other_outputs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">other_outputs</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
 
-        <span class="c1"># 自身に直接紐づく context を同期</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fem_global</span><span class="o">.</span><span class="n">objectives</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fem_global</span><span class="o">.</span><span class="n">constraints</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">other_outputs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fem_global</span><span class="o">.</span><span class="n">other_outputs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fem_global</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span>
-        <span class="p">)</span>
-
-        <span class="c1"># 問題の同期が終わったら optimizer の情報を</span>
-        <span class="c1"># 必要とする interface 向けの処理</span>
-        <span class="k">for</span> <span class="n">ctx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem_global</span><span class="o">.</span><span class="n">_fems</span><span class="o">.</span><span class="n">ordered_contexts</span><span class="p">:</span>
-            <span class="n">ctx</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_contact_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># 特殊処理が必要な場合は最後に fem の責任で行う</span>
+        <span class="k">for</span> <span class="n">ctx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">contexts</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">GlobalOptimizationData</span><span class="p">):</span>
+                <span class="n">ctx</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">contact_to_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">global_data</span><span class="p">,</span> <span class="n">ctx</span><span class="p">)</span>
 
     <span class="c1"># noinspection PyMethodMayBeStatic</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_additional_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
@@ -1467,8 +1556,9 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_collect_additional_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="n">additional_data</span> <span class="o">=</span> <span class="p">{}</span>
+
         <span class="n">additional_data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_additional_data</span><span class="p">())</span>
-        <span class="n">additional_data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_get_additional_data</span><span class="p">())</span>
+        <span class="n">additional_data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span><span class="o">.</span><span class="n">_get_additional_data</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">additional_data</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_finalize_history</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1490,10 +1580,15 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_done_setup_before_parallel</span><span class="p">:</span>
 
             <span class="c1"># check compatibility with fem if needed</span>
-            <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">get_variables</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">variable</span><span class="o">.</span><span class="n">pass_to_fem</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_check_param_and_raise</span><span class="p">(</span><span class="n">var_name</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ctx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">contexts</span><span class="p">:</span>
+                <span class="c1"># 共通</span>
+                <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">global_data</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">variable</span><span class="o">.</span><span class="n">pass_to_fem</span><span class="p">:</span>
+                        <span class="n">ctx</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_check_param_and_raise</span><span class="p">(</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="c1"># ctx ごと</span>
+                <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">ctx</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">variable</span><span class="o">.</span><span class="n">pass_to_fem</span><span class="p">:</span>
+                        <span class="n">ctx</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_check_param_and_raise</span><span class="p">(</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
             <span class="c1"># check the enqueued trials is</span>
             <span class="c1"># compatible with current optimization</span>
@@ -1571,34 +1666,7 @@
 
         <span class="c1"># setup if needed</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_after_parallel</span><span class="p">()</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_ordered_contexts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
-        <span class="nb">list</span><span class="p">[</span><span class="n">FEMContext</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">_UpdateMode</span><span class="p">]</span>
-    <span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Usage: for ctx, update_mode in zip(*self._ordered_contexts)&quot;&quot;&quot;</span>
-        <span class="n">contexts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">FEMContext</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">update_modes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">_UpdateMode</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">ctx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fem_global</span><span class="o">.</span><span class="n">_fems</span><span class="o">.</span><span class="n">ordered_contexts</span><span class="p">:</span>
-            <span class="n">contexts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
-            <span class="n">update_modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">_UpdateMode</span><span class="p">(</span>
-                    <span class="n">update_fem</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                    <span class="n">update_function</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="n">contexts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fem_global</span>
-        <span class="p">)</span>
-        <span class="n">update_modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="n">_UpdateMode</span><span class="p">(</span>
-                <span class="n">update_fem</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="n">update_function</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">contexts</span><span class="p">,</span> <span class="n">update_modes</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_after_parallel</span><span class="p">()</span></div>
 
 
 

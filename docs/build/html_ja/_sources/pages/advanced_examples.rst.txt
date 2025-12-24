@@ -48,6 +48,19 @@ Advanced Examples
         Using function-based bounds.
 
 
+.. grid:: 2
+
+    .. grid-item-card:: Multiple FEM Models
+        :link: ../advanced_examples/multiple_models/multiple_models
+        :link-type: doc
+        :text-align: center
+
+        .. image:: ../advanced_examples/multiple_models/thumbnail.png
+            :scale: 50
+        +++
+        Optimization example with multiple FEM models.
+
+
 .. toctree::
     :titlesonly:
     :hidden:
@@ -56,3 +69,4 @@ Advanced Examples
     ../advanced_examples/excel_ui/excel_ui
     ../advanced_examples/restart/restart
     ../advanced_examples/dynamic_bounds/dynamic_bounds
+    ../advanced_examples/multiple_models/multiple_models

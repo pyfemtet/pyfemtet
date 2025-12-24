@@ -101,7 +101,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.problem.variable_manager</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer._base_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">DIRECTION</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer._base_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">DIRECTION</span><span class="p">,</span> <span class="n">OptimizationDataPerFEM</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.history</span><span class="w"> </span><span class="kn">import</span> <span class="n">History</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_module_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.visualization.history_viewer._process_monitor._application</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -137,10 +137,32 @@
             <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span> <span class="o">=</span> <span class="n">opt</span> <span class="ow">or</span> <span class="n">OptunaOptimizer</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">fem</span> <span class="o">=</span> <span class="n">fem</span> <span class="ow">or</span> <span class="n">FemtetInterface</span><span class="p">()</span>
+        
+        <span class="c1"># fem が与えられていれば opt にセット</span>
+        <span class="k">if</span> <span class="n">fem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">fem</span> <span class="o">=</span> <span class="n">fem</span>
+
+        <span class="c1"># この時点で opt に fem がセットされていなければ</span>
+        <span class="c1"># デフォルトをセット</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">fems</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">fem</span> <span class="o">=</span> <span class="n">FemtetInterface</span><span class="p">()</span>
+        
+        <span class="c1"># fem が正しくセットされているか確認</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">fems</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;FEM interface could not be initialized. &quot;</span>
+                <span class="s2">&quot;Please ensure that a valid FEM interface is provided or can be created.&quot;</span>
+            <span class="p">)</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor_info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
+
+<div class="viewcode-block" id="FEMOpt.add_fem">
+<a class="viewcode-back" href="../../../modules/pyfemtet.opt.femopt.html#pyfemtet.opt.FEMOpt.add_fem">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_fem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OptimizationDataPerFEM</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fem</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="FEMOpt.add_constant_value">
 <a class="viewcode-back" href="../../../modules/pyfemtet.opt.femopt.html#pyfemtet.opt.FEMOpt.add_constant_value">[docs]</a>
@@ -433,7 +455,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">()</span>
 
             <span class="c1"># setup FEM (mainly for distributing files)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span><span class="o">.</span><span class="n">_setup_before_parallel</span><span class="p">()</span>
 
             <span class="c1"># create worker status list</span>
             <span class="n">entire_status</span> <span class="o">=</span> <span class="n">WorkerStatus</span><span class="p">(</span><span class="n">ENTIRE_PROCESS_STATUS_KEY</span><span class="p">)</span>

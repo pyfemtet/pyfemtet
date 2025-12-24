@@ -773,7 +773,7 @@
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_removing_tmp_db_if_needed</span><span class="p">():</span>
 
             <span class="c1"># quit FEM even if abnormal termination</span>
-            <span class="k">with</span> <span class="n">closing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">closing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span><span class="p">):</span>
 
                 <span class="c1"># load study creating in setup_before_parallel()</span>
                 <span class="c1"># located on dask scheduler</span>

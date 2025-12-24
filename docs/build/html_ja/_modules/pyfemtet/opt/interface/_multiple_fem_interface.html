@@ -89,20 +89,19 @@
 
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer._base_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractOptimizer</span><span class="p">,</span> <span class="n">FEMContext</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer._base_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+        <span class="n">AbstractOptimizer</span><span class="p">,</span>
+        <span class="n">GlobalOptimizationData</span><span class="p">,</span>
+        <span class="n">OptimizationDataPerFEM</span><span class="p">,</span>
+    <span class="p">)</span>
 
 
-<div class="viewcode-block" id="MultipleFEMInterface">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface">[ドキュメント]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">MultipleFEMInterface</span><span class="p">(</span><span class="n">AbstractFEMInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="FEMListInterface">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FEMListInterface">[ドキュメント]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FEMListInterface</span><span class="p">(</span><span class="n">AbstractFEMInterface</span><span class="p">):</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># TODO:</span>
-        <span class="c1">#   list ではなく dict のほうがいいか？</span>
-        <span class="c1">#   そもそも AbstractFEMInterface が</span>
-        <span class="c1">#   name を持ったほうがいいか？</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AbstractFEMInterface</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ctxs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">FEMContext</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">)</span>
@@ -113,74 +112,61 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AbstractFEMInterface</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">ordered_contexts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="s1">&#39;FEMContext&#39;</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctxs</span>
-
-<div class="viewcode-block" id="MultipleFEMInterface.add">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.add">[ドキュメント]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FEMContext</span><span class="p">:</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer._base_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMContext</span>
-        <span class="n">ctx</span> <span class="o">=</span> <span class="n">FEMContext</span><span class="p">(</span><span class="n">fem</span><span class="o">=</span><span class="n">fem</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fem</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ctxs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ctx</span></div>
+<div class="viewcode-block" id="FEMListInterface.append">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FEMListInterface.append">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fem</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="MultipleFEMInterface.remove">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.remove">[ドキュメント]</a>
+<div class="viewcode-block" id="FEMListInterface.remove">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FEMListInterface.remove">[ドキュメント]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fem</span><span class="p">:</span> <span class="n">AbstractFEMInterface</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">fem</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="MultipleFEMInterface.pop">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.pop">[ドキュメント]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+<div class="viewcode-block" id="FEMListInterface.pop">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FEMListInterface.pop">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AbstractFEMInterface</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
 
 
-    <span class="c1"># TODO: この属性がそもそも AbstractFEMInterface に必要か検討する。</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_load_problem_from_fem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">fem</span><span class="o">.</span><span class="n">_load_problem_from_fem</span> <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">)</span>
-
-<div class="viewcode-block" id="MultipleFEMInterface.update_parameter">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.update_parameter">[ドキュメント]</a>
+<div class="viewcode-block" id="FEMListInterface.update_parameter">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FEMListInterface.update_parameter">[ドキュメント]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">TrialInput</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
             <span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="MultipleFEMInterface.update">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.update">[ドキュメント]</a>
+<div class="viewcode-block" id="FEMListInterface.update">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FEMListInterface.update">[ドキュメント]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
             <span class="n">fem</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="MultipleFEMInterface.trial_preprocess">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.trial_preprocess">[ドキュメント]</a>
+<div class="viewcode-block" id="FEMListInterface.trial_preprocess">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FEMListInterface.trial_preprocess">[ドキュメント]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">trial_preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
             <span class="n">fem</span><span class="o">.</span><span class="n">trial_preprocess</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="MultipleFEMInterface.trial_postprocess">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.trial_postprocess">[ドキュメント]</a>
+<div class="viewcode-block" id="FEMListInterface.trial_postprocess">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FEMListInterface.trial_postprocess">[ドキュメント]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">trial_postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
             <span class="n">fem</span><span class="o">.</span><span class="n">trial_postprocess</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="MultipleFEMInterface.trial_preprocess_per_fidelity">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.trial_preprocess_per_fidelity">[ドキュメント]</a>
+<div class="viewcode-block" id="FEMListInterface.trial_preprocess_per_fidelity">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FEMListInterface.trial_preprocess_per_fidelity">[ドキュメント]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">trial_preprocess_per_fidelity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
             <span class="n">fem</span><span class="o">.</span><span class="n">trial_preprocess_per_fidelity</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="MultipleFEMInterface.trial_postprocess_per_fidelity">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.trial_postprocess_per_fidelity">[ドキュメント]</a>
+<div class="viewcode-block" id="FEMListInterface.trial_postprocess_per_fidelity">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FEMListInterface.trial_postprocess_per_fidelity">[ドキュメント]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">trial_postprocess_per_fidelity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
             <span class="n">fem</span><span class="o">.</span><span class="n">trial_postprocess_per_fidelity</span><span class="p">()</span></div>
@@ -190,8 +176,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">object_pass_to_fun</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">fem</span><span class="o">.</span><span class="n">object_pass_to_fun</span> <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">]</span>
 
-<div class="viewcode-block" id="MultipleFEMInterface.reopen">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.reopen">[ドキュメント]</a>
+<div class="viewcode-block" id="FEMListInterface.reopen">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FEMListInterface.reopen">[ドキュメント]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reopen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
             <span class="n">fem</span><span class="o">.</span><span class="n">reopen</span><span class="p">()</span></div>
@@ -206,46 +192,44 @@
             <span class="n">fem</span><span class="o">.</span><span class="n">_setup_after_parallel</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_param_and_raise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prm_name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># TODO:</span>
-        <span class="c1">#   - チェックする前に、与えられた prm_name が</span>
-        <span class="c1">#     どの FEM に属するかを特定し、</span>
-        <span class="c1">#     その FEM に対してのみチェックを行うようにする。</span>
-        <span class="c1">#   - そのために 与えられた prm_name がどの FEM に属するかを</span>
-        <span class="c1">#     管理する仕組みが必要。</span>
-        <span class="c1">#   - 変数は ctx が管理しているから、その仕組みは ctx にしか持てない。</span>
-        <span class="c1">#   - なので _check_param_and_raise は</span>
-        <span class="c1">#     optimizer が直接呼び出してはならず、</span>
-        <span class="c1">#     ctx のほうで prm_name をフィルタして呼び出す必要がある。</span>
-        <span class="c1">#   - まずはこのケースを通るはずのテストを作成してから実装する。</span>
-        <span class="k">pass</span>
+        <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
+            <span class="n">fem</span><span class="o">.</span><span class="n">_check_param_and_raise</span><span class="p">(</span><span class="n">prm_name</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MultipleFEMInterface.load_variables">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.load_variables">[ドキュメント]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">FEMContext</span><span class="p">):</span>
+<div class="viewcode-block" id="FEMListInterface.load_variables">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FEMListInterface.load_variables">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">OptimizationDataPerFEM</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
             <span class="n">fem</span><span class="o">.</span><span class="n">load_variables</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="MultipleFEMInterface.load_objectives">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.load_objectives">[ドキュメント]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_objectives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">FEMContext</span><span class="p">):</span>
+<div class="viewcode-block" id="FEMListInterface.load_objectives">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FEMListInterface.load_objectives">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_objectives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">OptimizationDataPerFEM</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
             <span class="n">fem</span><span class="o">.</span><span class="n">load_objectives</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="MultipleFEMInterface.load_constraints">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.load_constraints">[ドキュメント]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">FEMContext</span><span class="p">):</span>
+<div class="viewcode-block" id="FEMListInterface.load_constraints">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FEMListInterface.load_constraints">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">OptimizationDataPerFEM</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
             <span class="n">fem</span><span class="o">.</span><span class="n">load_constraints</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_contact_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">):</span>
+<div class="viewcode-block" id="FEMListInterface.contact_to_optimizer">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FEMListInterface.contact_to_optimizer">[ドキュメント]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">contact_to_optimizer</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">,</span>
+            <span class="n">global_data</span><span class="p">:</span> <span class="n">GlobalOptimizationData</span><span class="p">,</span>
+            <span class="n">ctx</span><span class="p">:</span> <span class="n">OptimizationDataPerFEM</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
-            <span class="n">fem</span><span class="o">.</span><span class="n">_contact_optimizer</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
+            <span class="n">fem</span><span class="o">.</span><span class="n">contact_to_optimizer</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">global_data</span><span class="p">,</span> <span class="n">ctx</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MultipleFEMInterface.close">
-<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.MultipleFEMInterface.close">[ドキュメント]</a>
+
+<div class="viewcode-block" id="FEMListInterface.close">
+<a class="viewcode-back" href="../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.FEMListInterface.close">[ドキュメント]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># TODO: 引数の取り扱い</span>
         <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fems</span><span class="p">:</span>
@@ -294,7 +278,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, Kazuma Naito.</p>
+    <p>&#169; Copyright 2023, pyfemtet.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-08 17:19+0900\n"
+"POT-Creation-Date: 2025-12-24 16:21+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -96,7 +96,7 @@ msgstr "Dispatch() のラッパーで、IFemtet 付きの PID を返します。
 #: pyfemtet.opt.femopt.FEMOpt.add_expression
 #: pyfemtet.opt.femopt.FEMOpt.add_expression_string
 #: pyfemtet.opt.femopt.FEMOpt.add_expression_sympy
-#: pyfemtet.opt.femopt.FEMOpt.add_objective
+#: pyfemtet.opt.femopt.FEMOpt.add_fem pyfemtet.opt.femopt.FEMOpt.add_objective
 #: pyfemtet.opt.femopt.FEMOpt.add_objectives
 #: pyfemtet.opt.femopt.FEMOpt.add_other_output
 #: pyfemtet.opt.femopt.FEMOpt.add_parameter
@@ -108,6 +108,7 @@ msgstr "Dispatch() のラッパーで、IFemtet 付きの PID を返します。
 #: pyfemtet.opt.history._history.History.get_df
 #: pyfemtet.opt.history._history.History.get_trial_name
 #: pyfemtet.opt.history._history.get_trial_name
+#: pyfemtet.opt.interface._base_interface.AbstractFEMInterface.contact_to_optimizer
 #: pyfemtet.opt.interface._base_interface.AbstractFEMInterface.load_constraints
 #: pyfemtet.opt.interface._base_interface.AbstractFEMInterface.load_objectives
 #: pyfemtet.opt.interface._base_interface.AbstractFEMInterface.load_variables
@@ -121,28 +122,25 @@ msgstr "Dispatch() のラッパーで、IFemtet 付きの PID を返します。
 #: pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.update_parameter
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.connect_femtet
-#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.load_objectives
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.open
-#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update_parameter
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.use_parametric_output_as_objective
 #: pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface
 #: pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface
 #: pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.update_parameter
+#: pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.append
+#: pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.contact_to_optimizer
+#: pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.load_constraints
+#: pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.load_objectives
+#: pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.load_variables
+#: pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.pop
+#: pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.remove
+#: pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.update_parameter
 #: pyfemtet.opt.interface._surrogate_model_interface.base_surrogate_interface.AbstractSurrogateModelInterfaceBase
-#: pyfemtet.opt.interface._surrogate_model_interface.base_surrogate_interface.AbstractSurrogateModelInterfaceBase.load_objectives
-#: pyfemtet.opt.interface._surrogate_model_interface.base_surrogate_interface.AbstractSurrogateModelInterfaceBase.load_variables
+#: pyfemtet.opt.interface._surrogate_model_interface.base_surrogate_interface.AbstractSurrogateModelInterfaceBase.contact_to_optimizer
 #: pyfemtet.opt.interface._surrogate_model_interface.botorch_interface.BoTorchInterface
 #: pyfemtet.opt.interface._surrogate_model_interface.botorch_interface.PoFBoTorchInterface
-#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_categorical_parameter
-#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_constant_value
-#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_constraint
-#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_expression
-#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_expression_string
-#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_expression_sympy
-#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_objective
-#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_objectives
-#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_other_output
-#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_parameter
+#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer._dispatch_global_data_store.<locals>.wrapper
+#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_fem
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_sub_fidelity_model
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_trial
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.get_parameter
@@ -158,6 +156,7 @@ msgstr "Dispatch() のラッパーで、IFemtet 付きの PID を返します。
 #: pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler.train_model_c
 #: pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFConfig
 #: pyfemtet.opt.optimizer.scipy_optimizer._scipy_optimizer.ScipyOptimizer
+#: pyfemtet.opt.optimizer.scipy_optimizer._scipy_optimizer.ScipyOptimizer.add_sub_fidelity_model
 #: pyfemtet.opt.optimizer.scipy_optimizer._scipy_optimizer.ScipyOptimizer.add_trial
 #: pyfemtet.opt.prediction._model.AbstractModel.fit
 #: pyfemtet.opt.prediction._model.AbstractModel.predict
@@ -208,7 +207,9 @@ msgstr "何らかの理由で Femtet プロセスに接続できませんでし�
 #: pyfemtet.logger._impl.get_module_logger
 #: pyfemtet.opt.FemtetInterface.object_pass_to_fun
 #: pyfemtet.opt.interface.AbstractFEMInterface.object_pass_to_fun
+#: pyfemtet.opt.interface.AbstractSurrogateModelInterfaceBase.object_pass_to_fun
 #: pyfemtet.opt.interface.ExcelInterface.object_pass_to_fun
+#: pyfemtet.opt.interface.FEMListInterface.object_pass_to_fun
 #: pyfemtet.opt.interface.FemtetInterface.object_pass_to_fun
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.use_parametric_output_as_objective
 #: pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler.sample_relative
@@ -229,11 +230,15 @@ msgstr "Femtetと制御対象のFemtetのPIDを制御するためのオブジェ
 #: pyfemtet.opt.femopt.FEMOpt.add_expression
 #: pyfemtet.opt.femopt.FEMOpt.add_expression_string
 #: pyfemtet.opt.femopt.FEMOpt.add_expression_sympy
-#: pyfemtet.opt.femopt.FEMOpt.add_objective
+#: pyfemtet.opt.femopt.FEMOpt.add_fem pyfemtet.opt.femopt.FEMOpt.add_objective
 #: pyfemtet.opt.femopt.FEMOpt.add_parameter
 #: pyfemtet.opt.history._history.History.get_df
 #: pyfemtet.opt.interface.ExcelInterface.object_pass_to_fun
 #: pyfemtet.opt.interface.FemtetInterface.object_pass_to_fun
+#: pyfemtet.opt.interface._base_interface.AbstractFEMInterface.trial_postprocess
+#: pyfemtet.opt.interface._base_interface.AbstractFEMInterface.trial_postprocess_per_fidelity
+#: pyfemtet.opt.interface._base_interface.AbstractFEMInterface.trial_preprocess
+#: pyfemtet.opt.interface._base_interface.AbstractFEMInterface.trial_preprocess_per_fidelity
 #: pyfemtet.opt.interface._base_interface.AbstractFEMInterface.update
 #: pyfemtet.opt.interface._base_interface.AbstractFEMInterface.update_parameter
 #: pyfemtet.opt.interface._base_interface.NoFEM.update
@@ -242,20 +247,17 @@ msgstr "Femtetと制御対象のFemtetのPIDを制御するためのオブジェ
 #: pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.update_parameter
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.femtet_is_alive
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.open
-#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.solve
-#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update
-#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update_model
-#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update_parameter
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.use_parametric_output_as_objective
 #: pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.update_parameter
+#: pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.pop
+#: pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.trial_postprocess
+#: pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.trial_postprocess_per_fidelity
+#: pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.trial_preprocess
+#: pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.trial_preprocess_per_fidelity
+#: pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.update_parameter
 #: pyfemtet.opt.interface._surrogate_model_interface.botorch_interface.BoTorchInterface.update
 #: pyfemtet.opt.interface._surrogate_model_interface.botorch_interface.PoFBoTorchInterface.update
-#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_categorical_parameter
-#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_expression
-#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_expression_string
-#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_expression_sympy
-#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_objective
-#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_parameter
+#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.add_fem
 #: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer.run
 #: pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer.OptunaOptimizer.add_categorical_parameter
 #: pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer.OptunaOptimizer.add_parameter
@@ -335,7 +337,6 @@ msgstr "pyfemtet.opt.femopt module"
 
 #: of pyfemtet.opt.femopt.FEMOpt:1 pyfemtet.opt.history._history.History:1
 #: pyfemtet.opt.interface._base_interface.AbstractFEMInterface:1
-#: pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer:1
 #: pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PartialOptimizeACQFConfig:1
 #: pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFConfig:1
 #: pyfemtet.opt.prediction._model.AbstractModel:1
@@ -542,7 +543,9 @@ msgstr "接続された Femtet プロセスが存在するかどうかを返し�
 
 #: of pyfemtet.opt.FemtetInterface.object_pass_to_fun:1
 #: pyfemtet.opt.interface.AbstractFEMInterface.object_pass_to_fun:1
+#: pyfemtet.opt.interface.AbstractSurrogateModelInterfaceBase.object_pass_to_fun:1
 #: pyfemtet.opt.interface.ExcelInterface.object_pass_to_fun:1
+#: pyfemtet.opt.interface.FEMListInterface.object_pass_to_fun:1
 #: pyfemtet.opt.interface.FemtetInterface.object_pass_to_fun:1
 msgid "The object pass to the first argument of user-defined objective functions."
 msgstr "ユーザー定義目的関数の第1引数に渡されるオブジェクト。"
@@ -558,52 +561,9 @@ msgid "Open specific analysis model with connected Femtet."
 msgstr "接続された Femtet で特定の解析モデルを開きます。"
 
 #: of
-#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.postprocess:1
-msgid "A method called just after :func:`solve`."
-msgstr ""
-
-#: of
-#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.postprocess:3
-msgid "This method is called just after solve. By inheriting from the Interface class and overriding this method, it is possible to perform any desired postprocessing after the solve and before evaluating objectives."
-msgstr ""
-
-#: of
-#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.preprocess:1
-msgid "A method called just before :func:`solve`."
-msgstr ""
-
-#: of
-#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.preprocess:3
-msgid "This method is called just before solve. By inheriting from the Interface class and overriding this method, it is possible to perform any desired preprocessing after the model update and before solving."
-msgstr ""
-
-#: of
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.quit:1
 msgid "Force to terminate connected Femtet."
 msgstr "接続された Femtet を強制終了します。"
-
-#: of
-#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.solve:1
-msgid "Execute FEM analysis."
-msgstr ""
-
-#: of
-#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update:1
-msgid "See :func:`FEMInterface.update`"
-msgstr ""
-
-#: of
-#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update_model:1
-#: pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface.update_model:1
-#: pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.update_model:1
-msgid "Updates the analysis model only."
-msgstr ""
-
-#: of
-#: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update_parameter:1
-#: pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.update_parameter:1
-msgid "Update parameter of femprj."
-msgstr ""
 
 #: of
 #: pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.use_parametric_output_as_objective:1
@@ -742,6 +702,11 @@ msgstr "True の場合、このオブジェクトが破棄されると SolidWork
 #: pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface:28
 msgid "If True, SolidWorks will be started in visible mode. Defaults to True."
 msgstr "True の場合、SolidWorks は表示モードで起動されます。初期値は True です。"
+
+#: of
+#: pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.update_model:1
+msgid "Update .sldprt"
+msgstr ""
 
 #: of pyfemtet.opt.optimizer._base_optimizer.SubFidelityModel:1
 #: pyfemtet.opt.optimizer.optuna_optimizer._optuna_optimizer.OptunaOptimizer:1
@@ -966,10 +931,13 @@ msgid "pyfemtet.opt.interface package"
 msgstr "pyfemtet.opt.interface package"
 
 #: of pyfemtet.opt.interface.AbstractFEMInterface.object_pass_to_fun:3
+#: pyfemtet.opt.interface.AbstractSurrogateModelInterfaceBase.object_pass_to_fun:3
+#: pyfemtet.opt.interface.FEMListInterface.object_pass_to_fun:3
 msgid "self (AbstractFEMInterface)"
 msgstr "self (AbstractFEMInterface)"
 
 #: of pyfemtet.opt.interface._base_interface.NoFEM:1
+#: pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface:1
 #: pyfemtet.opt.interface._surrogate_model_interface.base_surrogate_interface.AbstractSurrogateModelInterfaceBase:1
 msgid "Bases: :py:class:`~pyfemtet.opt.interface._base_interface.AbstractFEMInterface`"
 msgstr "Bases: :py:class:`~pyfemtet.opt.interface._base_interface.AbstractFEMInterface`"
@@ -1150,6 +1118,11 @@ msgstr "pyfemtet.opt.meta\\_script package"
 #: ../source/modules/pyfemtet.opt.optimizer.rst:2
 msgid "pyfemtet.opt.optimizer package"
 msgstr "pyfemtet.opt.optimizer package"
+
+#: of pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer:1
+#, fuzzy
+msgid "Bases: :py:class:`~pyfemtet.opt.optimizer._base_optimizer.OptimizationData`"
+msgstr "Bases: :py:class:`~pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer`"
 
 #: of
 #: pyfemtet.opt.optimizer.optuna_optimizer._pof_botorch.pof_botorch_sampler.PoFBoTorchSampler:1
@@ -2068,28 +2041,28 @@ msgstr "pyfemtet.opt.visualization.plotter.pm\\_graph\\_creator module"
 #~ msgstr ""
 
 #~ msgid "A method called just after :func:`solve`."
-#~ msgstr ":func:`solve` の直後に呼び出されるメソッドです。"
+#~ msgstr ""
 
 #~ msgid "This method is called just after solve. By inheriting from the Interface class and overriding this method, it is possible to perform any desired postprocessing after the solve and before evaluating objectives."
-#~ msgstr "このメソッドは solve の直後に呼び出されます。Interface クラスを継承し、このメソッドをオーバーライドすることで、solve 後および目的の評価前に任意の後処理を実行することが可能です。"
+#~ msgstr ""
 
 #~ msgid "A method called just before :func:`solve`."
-#~ msgstr ":func:`solve` の直前に呼び出されるメソッドです。"
+#~ msgstr ""
 
 #~ msgid "This method is called just before solve. By inheriting from the Interface class and overriding this method, it is possible to perform any desired preprocessing after the model update and before solving."
-#~ msgstr "このメソッドは solve の直前に呼び出されます。Interface クラスを継承し、このメソッドをオーバーライドすることで、モデルの更新後かつソルブ前に任意の前処理を実行することが可能です。"
+#~ msgstr ""
 
 #~ msgid "Execute FEM analysis."
-#~ msgstr "FEM 解析を実行します。"
+#~ msgstr ""
 
 #~ msgid "See :func:`FEMInterface.update`"
-#~ msgstr ":func:`FEMInterface.update` を参照してください。"
+#~ msgstr ""
 
 #~ msgid "Updates the analysis model only."
-#~ msgstr "解析モデルのみを更新します。"
+#~ msgstr ""
 
 #~ msgid "Update parameter of femprj."
-#~ msgstr "femprj のパラメータを更新します。"
+#~ msgstr ""
 
 #~ msgid "The values of parameters and objectives first."
 #~ msgstr "パラメータと目的関数の値を最初にします。"

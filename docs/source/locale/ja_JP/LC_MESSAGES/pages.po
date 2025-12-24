@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-09 09:47+0900\n"
+"POT-Creation-Date: 2025-12-24 16:21+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -78,6 +78,14 @@ msgstr "関数による動的な上下限設定"
 #: ../source/pages/advanced_examples.rst:48
 msgid "Using function-based bounds."
 msgstr "関数を使って動的に上下限を設定します。"
+
+#: ../source/pages/advanced_examples.rst:53
+msgid "Multiple FEM Models"
+msgstr "複数の FEM モデル"
+
+#: ../source/pages/advanced_examples.rst:61
+msgid "Optimization example with multiple FEM models."
+msgstr "複数の解析モデルを連携して最適化を行います。"
 
 # no-translate
 #: ../source/pages/api.rst:2

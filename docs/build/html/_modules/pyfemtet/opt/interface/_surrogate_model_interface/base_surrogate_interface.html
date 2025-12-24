@@ -90,7 +90,12 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet._i18n</span><span class="w"> </span><span class="kn">import</span> <span class="n">_</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer._base_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMContext</span><span class="p">,</span> <span class="n">AbstractOptimizer</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer._base_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+        <span class="n">AbstractOptimizer</span><span class="p">,</span>
+        <span class="n">GlobalOptimizationData</span><span class="p">,</span>
+        <span class="n">OptimizationDataPerFEM</span><span class="p">,</span>
+        <span class="n">DIRECTION</span>
+    <span class="p">)</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -101,18 +106,18 @@
 <div class="viewcode-block" id="AbstractSurrogateModelInterfaceBase">
 <a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.AbstractSurrogateModelInterfaceBase">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AbstractSurrogateModelInterfaceBase</span><span class="p">(</span><span class="n">AbstractFEMInterface</span><span class="p">):</span>
-    <span class="n">_load_problem_from_fem</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">current_obj_values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
     <span class="n">train_history</span><span class="p">:</span> <span class="n">History</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
-            <span class="n">history_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">train_history</span><span class="p">:</span> <span class="n">History</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">history_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">train_history</span><span class="p">:</span> <span class="n">History</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">_output_directions</span><span class="p">:</span> <span class="p">(</span>
-                <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span>
-                <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span>
-                <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span>
+                <span class="n">Sequence</span><span class="p">[</span><span class="n">DIRECTION</span><span class="p">]</span>
+                <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DIRECTION</span><span class="p">]</span>
+                <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">DIRECTION</span><span class="p">]</span>
+                <span class="o">|</span> <span class="kc">None</span>
             <span class="p">)</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">):</span>
 
@@ -129,103 +134,98 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">current_obj_values</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_contact_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">load_objectives</span><span class="p">(</span><span class="n">opt</span><span class="o">.</span><span class="n">fem_global</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_pass_to_fun</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_obj_values</span>
+    
+<div class="viewcode-block" id="AbstractSurrogateModelInterfaceBase.contact_to_optimizer">
+<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.AbstractSurrogateModelInterfaceBase.contact_to_optimizer">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">contact_to_optimizer</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">opt</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">,</span>
+            <span class="n">global_data</span><span class="p">:</span> <span class="n">GlobalOptimizationData</span><span class="p">,</span>
+            <span class="n">ctx</span><span class="p">:</span> <span class="n">OptimizationDataPerFEM</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># output_directions で指定された分を</span>
+        <span class="c1"># ctx に対して add_objective する。</span>
 
-<div class="viewcode-block" id="AbstractSurrogateModelInterfaceBase.load_objectives">
-<a class="viewcode-back" href="../../../../../modules/pyfemtet.opt.interface.html#pyfemtet.opt.interface.AbstractSurrogateModelInterfaceBase.load_objectives">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_objectives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">:</span> <span class="n">FEMContext</span><span class="p">):</span>
-
-        <span class="c1"># output directions が与えられない場合、</span>
-        <span class="c1"># opt.add_objective との整合をチェックする</span>
+        <span class="c1"># directions を正規化</span>
+        <span class="n">name_and_directions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DIRECTION</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="c1"># add_objective された目的のうち、</span>
-            <span class="c1"># training data に含まれる名前ならば</span>
-            <span class="c1"># fun を「その時点の current_obj_values を返す関数」で</span>
-            <span class="c1"># 上書き</span>
-            <span class="n">obj_name</span><span class="p">:</span> <span class="nb">str</span>
-            <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">opt</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="c1"># あれば上書き、なければ surrogate 最適化の際に</span>
-                <span class="c1"># 新しく追加した model を使わない目的関数と見做して何もしない</span>
-                <span class="k">if</span> <span class="n">obj_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">:</span>
-                    <span class="n">obj</span><span class="o">.</span><span class="n">fun</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">,</span> <span class="n">obj_name_</span><span class="o">=</span><span class="n">obj_name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_obj_values</span><span class="p">[</span><span class="n">obj_name_</span><span class="p">]</span>
-                    <span class="n">obj</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
-                    <span class="n">obj</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-
-        <span class="c1"># dict で与えられた場合</span>
+            <span class="n">name_and_directions</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-
-            <span class="c1"># index 入力か str 入力かで統一されているか確認</span>
-            <span class="n">keys</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-            <span class="k">assert</span> <span class="nb">all</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">]),</span> <span class="n">_</span><span class="p">(</span>
-                <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;The keys of _output_directions must be &#39;</span>
-                           <span class="s1">&#39;all-int or all-str.&#39;</span><span class="p">,</span>
-                <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;_output_directions のキーは int または str で&#39;</span>
-                           <span class="s1">&#39;統一されていなければなりません。&#39;</span><span class="p">,</span>
-            <span class="p">)</span>
-
-            <span class="c1"># index がキーである場合</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">direction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-                    <span class="n">obj_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
-
-                    <span class="n">opt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span>
-                        <span class="n">name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
-                        <span class="n">fun</span><span class="o">=</span><span class="k">lambda</span> <span class="n">_</span><span class="p">,</span> <span class="n">obj_name_</span><span class="o">=</span><span class="n">obj_name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_obj_values</span><span class="p">[</span><span class="n">obj_name_</span><span class="p">],</span>
-                        <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">,</span>
-                        <span class="n">args</span><span class="o">=</span><span class="p">(),</span>
-                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{},</span>
-                    <span class="p">)</span>
-
-            <span class="c1"># obj_name がキーである場合</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
-
-                <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">direction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">assert</span> <span class="n">obj_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span>
-                        <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;The objective name passed as a key of &#39;</span>
-                                   <span class="s1">&#39;_output_direction must be one of the history</span><span class="se">\&#39;</span><span class="s1">s &#39;</span>
-                                   <span class="s1">&#39;objective names. Passed name: </span><span class="si">{obj_name}</span><span class="s1"> / &#39;</span>
-                                   <span class="s1">&#39;History</span><span class="se">\&#39;</span><span class="s1">s names: </span><span class="si">{obj_names}</span><span class="s1">&#39;</span><span class="p">,</span>
-                        <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;_output_directions に目的関数名を与える場合は&#39;</span>
-                                   <span class="s1">&#39;history に含まれる名前を指定しなければなりません。&#39;</span>
-                                   <span class="s1">&#39;与えられた目的名: </span><span class="si">{obj_name}</span><span class="s1"> / history に含まれる&#39;</span>
-                                   <span class="s1">&#39;目的名: </span><span class="si">{obj_names}</span><span class="s1">&#39;</span><span class="p">,</span>
-                        <span class="n">obj_name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
-                        <span class="n">obj_names</span><span class="o">=</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">)</span>
-                    <span class="p">)</span>
-
-                    <span class="n">opt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span>
-                        <span class="n">name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
-                        <span class="n">fun</span><span class="o">=</span><span class="k">lambda</span> <span class="n">obj_name_</span><span class="o">=</span><span class="n">obj_name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_obj_values</span><span class="p">[</span><span class="n">obj_name_</span><span class="p">],</span>
-                        <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">,</span>
-                        <span class="n">args</span><span class="o">=</span><span class="p">(),</span>
-                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{},</span>
-                    <span class="p">)</span>
-
-        <span class="c1"># tuple で与えられた場合</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> \
-                <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
-
+            <span class="n">name_and_directions</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">obj_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span>
-            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj_names</span><span class="p">),</span> <span class="n">_</span><span class="p">(</span>
-                <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;The length of _output_directions passed as a list &#39;</span>
-                           <span class="s1">&#39;must be same with that of the history</span><span class="se">\&#39;</span><span class="s1">s objective &#39;</span>
-                           <span class="s1">&#39;names.&#39;</span><span class="p">,</span>
-                <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;_output_directions をリストで渡す場合は&#39;</span>
-                           <span class="s1">&#39;その長さが history の目的関数数と一致して&#39;</span>
-                           <span class="s1">&#39;いなければなりません。&#39;</span>
-            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">obj_name_or_index</span><span class="p">,</span> <span class="n">direction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj_name_or_index</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                    <span class="n">obj_name</span> <span class="o">=</span> <span class="n">obj_names</span><span class="p">[</span><span class="n">obj_name_or_index</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">obj_name</span> <span class="o">=</span> <span class="n">obj_name_or_index</span>
+                <span class="n">name_and_directions</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">obj_name</span><span class="p">:</span> <span class="n">direction</span><span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">obj_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj_names</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+                    <span class="n">en_message</span><span class="o">=</span><span class="s1">&#39;The length of _output_directions passed as a list &#39;</span>
+                            <span class="s1">&#39;must be same with that of the history</span><span class="se">\&#39;</span><span class="s1">s objective &#39;</span>
+                            <span class="s1">&#39;names.&#39;</span><span class="p">,</span>
+                    <span class="n">jp_message</span><span class="o">=</span><span class="s1">&#39;_output_directions をリストで渡す場合は&#39;</span>
+                            <span class="s1">&#39;その長さが history の目的関数数と一致して&#39;</span>
+                            <span class="s1">&#39;いなければなりません。&#39;</span>
+                <span class="p">))</span>
+            <span class="n">name_and_directions</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">obj_name</span><span class="p">:</span> <span class="n">direction</span>
+                <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">direction</span>
+                <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">obj_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="p">)</span>
+            <span class="p">}</span>
 
-            <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">direction</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">obj_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_directions</span><span class="p">):</span>
-                <span class="n">opt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span>
-                    <span class="n">name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
-                    <span class="n">fun</span><span class="o">=</span><span class="k">lambda</span> <span class="n">_</span><span class="p">,</span> <span class="n">obj_name_</span><span class="o">=</span><span class="n">obj_name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_obj_values</span><span class="p">[</span><span class="n">obj_name_</span><span class="p">],</span>
-                    <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">,</span>
-                    <span class="n">args</span><span class="o">=</span><span class="p">(),</span>
-                    <span class="n">kwargs</span><span class="o">=</span><span class="p">{},</span>
-                <span class="p">)</span></div>
+        <span class="c1"># global に紐づいていると objective_pass_to_fun が Sequence になるので</span>
+        <span class="c1"># global に登録されたものの内 train に含まれるものは ctx に移動</span>
+        <span class="n">obj_names_to_remove</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">global_data</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">obj_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">:</span>
+                <span class="n">obj_names_to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">obj_name</span><span class="p">)</span>
+                <span class="n">ctx</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">obj_name</span><span class="p">:</span> <span class="n">obj</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">obj_name</span> <span class="ow">in</span> <span class="n">obj_names_to_remove</span><span class="p">:</span>
+            <span class="n">global_data</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">obj_name</span><span class="p">)</span>
+
+        <span class="c1"># directions に含まれるものをすべて ctx に追加または上書き</span>
+        <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">direction</span> <span class="ow">in</span> <span class="n">name_and_directions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="c1"># validation</span>
+            <span class="k">if</span> <span class="n">obj_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span>
+                    <span class="n">en_message</span><span class="o">=</span><span class="s2">&quot;The objective name </span><span class="si">{obj_name}</span><span class="s2"> is &quot;</span>
+                               <span class="s2">&quot;not in the train_history&#39;s objectives: &quot;</span>
+                               <span class="s2">&quot;</span><span class="si">{obj_names}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">jp_message</span><span class="o">=</span><span class="s2">&quot;目的関数名 </span><span class="si">{obj_name}</span><span class="s2"> は &quot;</span>
+                               <span class="s2">&quot;train_history の目的関数: &quot;</span>
+                               <span class="s2">&quot;</span><span class="si">{obj_names}</span><span class="s2"> に含まれていません。&quot;</span><span class="p">,</span>
+                    <span class="n">obj_name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
+                    <span class="n">obj_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">,</span>
+                <span class="p">))</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">dummy</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="kc">False</span>
+
+            <span class="n">ctx</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">obj_name</span><span class="p">,</span> <span class="n">dummy</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">supress_duplicated_name_check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1"># ctx の目的関数のうち train に含まれるものを差し替え</span>
+        <span class="c1"># directions の目的変数名を validation しているので漏れはないはず</span>
+        <span class="k">for</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">ctx</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">obj_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_history</span><span class="o">.</span><span class="n">obj_names</span><span class="p">:</span>
+                <span class="c1"># global 由来のものは何が入っているかわからないので</span>
+                <span class="c1"># 必要な変数を確実に上書き</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="n">name_and_directions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj_name</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">direction</span><span class="p">)</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">fun</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">obj_values</span><span class="p">,</span> <span class="n">obj_name_</span><span class="o">=</span><span class="n">obj_name</span><span class="p">:</span> <span class="n">obj_values</span><span class="p">[</span><span class="n">obj_name_</span><span class="p">]</span>
+
+        <span class="c1"># これが呼ばれた後に optimizer の同期はされないので</span>
+        <span class="c1"># ここで同期する</span>
+        <span class="n">opt</span><span class="o">.</span><span class="n">_initialize_objectives</span><span class="p">()</span>
+        <span class="n">opt</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">objectives</span><span class="p">)</span>
+        <span class="n">opt</span><span class="o">.</span><span class="n">objectives</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">global_data</span><span class="o">.</span><span class="n">objectives</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_using_fem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">:</span> <span class="nb">callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>

@@ -103,7 +103,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.variable_manager</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer._base_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMContext</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.optimizer._base_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptimizationDataPerFEM</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractFEMInterface</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -135,7 +135,7 @@
     <span class="n">_fun</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
     <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span>
     <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span>
-    <span class="n">fem_ctx</span><span class="p">:</span> <span class="n">FEMContext</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">fem_ctx</span><span class="p">:</span> <span class="n">OptimizationDataPerFEM</span> <span class="o">|</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fun</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>

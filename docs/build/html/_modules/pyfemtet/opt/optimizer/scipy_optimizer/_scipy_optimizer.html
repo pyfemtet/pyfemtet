@@ -327,9 +327,9 @@
             <span class="n">pass_to_fem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable_manager</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span>
                 <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;pass_to_fem&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;raw&#39;</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="n">pass_to_fem</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span><span class="o">.</span><span class="n">update_parameter</span><span class="p">(</span><span class="n">pass_to_fem</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">cns</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cns</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_scipy_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span>
         <span class="kc">None</span>
@@ -502,7 +502,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_n_succeeded_trials_in_current_optimization</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="c1"># ===== run =====</span>
-        <span class="k">with</span> <span class="n">closing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fem</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">closing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fem_manager</span><span class="o">.</span><span class="n">all_fems_as_a_fem</span><span class="p">):</span>
 
             <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setting_status</span><span class="p">(),</span> \
                     <span class="n">suppress</span><span class="p">(</span><span class="n">InterruptOptimization</span><span class="p">),</span> \

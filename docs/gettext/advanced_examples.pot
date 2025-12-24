@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-09 09:47+0900\n"
+"POT-Creation-Date: 2025-12-24 16:23+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,6 +26,7 @@ msgstr ""
 
 #: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:11
 #: ../source/advanced_examples/excel_ui/excel_ui.rst:9
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:9
 #: ../source/advanced_examples/restart/restart.rst:9
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:9
 msgid "Sample Files"
@@ -190,12 +191,14 @@ msgid "Appearance of the Model"
 msgstr ""
 
 #: ../source/advanced_examples/excel_ui/excel_ui.rst:54
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:58
 #: ../source/advanced_examples/restart/restart.rst:70
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
 msgid "Variable Name"
 msgstr ""
 
 #: ../source/advanced_examples/excel_ui/excel_ui.rst:54
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:58
 #: ../source/advanced_examples/restart/restart.rst:70
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
 msgid "Description"
@@ -268,6 +271,96 @@ msgstr ""
 msgid "The pyfemtet-core.py performs optimization by controlling the values of various cells in the xlsm file and executing macros instead of directly running Femtet. This allows for integration with PyFemtet without needing to rewrite all existing code if you are already using Excel macros for an automated design flow with Femtet."
 msgstr ""
 
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:2
+msgid "Optimization with Multiple FEM Models"
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:4
+msgid "This sample explains how to use multiple FEM models simultaneously within a single optimization problem."
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:12
+msgid "Keep the :download:`sample project<cylinder-shaft-cooling.femprj>` and :download:`sample script<optimize_with_multiple_models.py>` in the same folder."
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:20
+#: ../source/advanced_examples/restart/restart.rst:20
+msgid "What This Sample Will Do"
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:22
+msgid "This sample performs optimization using two different analysis models contained in a single project file."
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:25
+msgid "The first model performs a 2D cooling analysis and uses the maximum temperature as an objective function."
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:28
+msgid "The second model performs a 3D eigenvalue analysis and uses the difference between the operating frequency and natural frequency as an objective to maximize."
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:35
+msgid "By using this feature, you can perform thermal analysis and structural analysis simultaneously on the same geometry, enabling optimization that considers both thermal and strength requirements."
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:43
+msgid "You can set variables, objective functions, and constraints individually for each FEM model. The overall optimization problem integrates the objective functions and constraints from all models."
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:50
+msgid "Design Variables and Analysis Settings"
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:55
+msgid "Overview of the model and analysis settings. The design variables are shared between the two analysis models."
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:60
+msgid "internal_radius"
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:60
+msgid "The inner radius of the shaft."
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:61
+msgid "cooling_area_radius"
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:61
+msgid "The radius of the cooling area."
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:66
+msgid "Objective Functions"
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:71
+msgid "Objective function settings"
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:73
+msgid "Maximum Temperature (minimize) - obtained from the 2D thermal-fluid analysis model"
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:74
+msgid "Difference between Operating Frequency and Natural Frequency (maximize) - obtained from the 3D resonance analysis model"
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:78
+msgid "Execution Result of the Sample"
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:83
+msgid "Screenshot of the result. Increasing each radius to improve cooling performance causes the natural frequency to decrease and approach the operating frequency."
+msgstr ""
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:91
+#: ../source/advanced_examples/restart/restart.rst:95
+msgid "When performing effective optimization on real-world problems, a greater number of trials is necessary."
+msgstr ""
+
 #: ../source/advanced_examples/restart/restart.rst:2
 msgid "Restarting Optimization"
 msgstr ""
@@ -278,10 +371,6 @@ msgstr ""
 
 #: ../source/advanced_examples/restart/restart.rst:12
 msgid "Keep the :download:`sample project<gal_ex13_parametric.femprj>` and :download:`sample script<gal_ex13_parametric_restart.py>` on same folder."
-msgstr ""
-
-#: ../source/advanced_examples/restart/restart.rst:20
-msgid "What This Sample Will Do"
 msgstr ""
 
 #: ../source/advanced_examples/restart/restart.rst:22
@@ -345,10 +434,6 @@ msgstr ""
 
 #: ../source/advanced_examples/restart/restart.rst:90
 msgid "Screenshot of the result"
-msgstr ""
-
-#: ../source/advanced_examples/restart/restart.rst:95
-msgid "When performing effective optimization on real-world problems, a greater number of trials is necessary."
 msgstr ""
 
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:2

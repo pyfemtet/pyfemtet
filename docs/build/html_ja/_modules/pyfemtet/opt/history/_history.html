@@ -82,7 +82,7 @@
   <h1>pyfemtet.opt.history._history のソースコード</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">TypeAlias</span><span class="p">,</span> <span class="n">Literal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">TypeAlias</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
@@ -112,7 +112,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.history._hypervolume</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractFEMInterface</span><span class="p">,</span> <span class="n">MultipleFEMInterface</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyfemtet.opt.interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractFEMInterface</span><span class="p">,</span> <span class="n">FEMListInterface</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;TrialState&quot;</span><span class="p">,</span>
@@ -1522,7 +1522,7 @@
         <span class="k">return</span> <span class="n">get_trial_name</span><span class="p">(</span><span class="n">trial</span><span class="p">,</span> <span class="n">fidelity</span><span class="p">,</span> <span class="n">sub_sampling</span><span class="p">,</span> <span class="n">row</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">recording</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fems</span><span class="p">:</span> <span class="n">MultipleFEMInterface</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">recording</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fems</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">AbstractFEMInterface</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;:meta private:&quot;&quot;&quot;</span>
 
         <span class="c1"># noinspection PyMethodParameters</span>
@@ -1569,16 +1569,6 @@
                         <span class="p">)</span>
 
                 <span class="k">else</span><span class="p">:</span>
-<<<<<<< HEAD
-                    <span class="n">fem</span><span class="o">.</span><span class="n">_postprocess_after_recording</span><span class="p">(</span>
-                        <span class="n">dask_scheduler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">trial_name</span><span class="o">=</span><span class="n">trial_name</span><span class="p">,</span>
-                        <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
-                        <span class="o">**</span><span class="p">(</span><span class="n">fem</span><span class="o">.</span><span class="n">_create_postprocess_args</span><span class="p">()),</span>
-                    <span class="p">)</span>
-
-            <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="n">self_</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
-=======
                     <span class="k">for</span> <span class="n">fem</span> <span class="ow">in</span> <span class="n">fems</span><span class="p">:</span>
                         <span class="n">fem</span><span class="o">.</span><span class="n">_postprocess_after_recording</span><span class="p">(</span>
                             <span class="n">dask_scheduler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1590,7 +1580,6 @@
             <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="n">self_</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
                 <span class="n">self_</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">datetime_end</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
 
->>>>>>> feature/multiple-fem
                 <span class="n">row</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
                 <span class="c1"># record feasibility</span>

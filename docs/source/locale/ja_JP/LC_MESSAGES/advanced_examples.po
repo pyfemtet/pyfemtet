@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-09 09:47+0900\n"
+"POT-Creation-Date: 2025-12-24 16:23+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -29,6 +29,7 @@ msgstr "これは開発中の機能です。将来のバージョンでは動作
 
 #: ../source/advanced_examples/dynamic_bounds/dynamic_bounds.rst:11
 #: ../source/advanced_examples/excel_ui/excel_ui.rst:9
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:9
 #: ../source/advanced_examples/restart/restart.rst:9
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:9
 msgid "Sample Files"
@@ -193,12 +194,14 @@ msgid "Appearance of the Model"
 msgstr "モデルの外観"
 
 #: ../source/advanced_examples/excel_ui/excel_ui.rst:54
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:58
 #: ../source/advanced_examples/restart/restart.rst:70
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
 msgid "Variable Name"
 msgstr "変数名"
 
 #: ../source/advanced_examples/excel_ui/excel_ui.rst:54
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:58
 #: ../source/advanced_examples/restart/restart.rst:70
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:75
 msgid "Description"
@@ -271,6 +274,96 @@ msgstr "実行中のスクリーンショット"
 msgid "The pyfemtet-core.py performs optimization by controlling the values of various cells in the xlsm file and executing macros instead of directly running Femtet. This allows for integration with PyFemtet without needing to rewrite all existing code if you are already using Excel macros for an automated design flow with Femtet."
 msgstr "pyfemtet-core.pyは、Femtetを直接実行する代わりに、xlsmファイルの各種セルの値を制御し、マクロを実行することで最適化を実施します。これにより、すでにExcelマクロを用いてFemtetによる自動設計フローを運用している場合、そのコードをすべてPythonに書き直すことなくPyFemtetとの統合が可能です。"
 
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:2
+msgid "Optimization with Multiple FEM Models"
+msgstr "複数の FEM モデルを用いた最適化"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:4
+msgid "This sample explains how to use multiple FEM models simultaneously within a single optimization problem."
+msgstr "このサンプルでは、1 つの最適化問題の中で複数の FEM モデルを同時に使用する方法を説明します。"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:12
+msgid "Keep the :download:`sample project<cylinder-shaft-cooling.femprj>` and :download:`sample script<optimize_with_multiple_models.py>` in the same folder."
+msgstr ":download:`サンプルプロジェクト<cylinder-shaft-cooling.femprj>` と :download:`サンプルコード<optimize_with_multiple_models.py>` を同じフォルダに配置してください。"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:20
+#: ../source/advanced_examples/restart/restart.rst:20
+msgid "What This Sample Will Do"
+msgstr "このサンプルの動作"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:22
+msgid "This sample performs optimization using two different analysis models contained in a single project file."
+msgstr "このサンプルでは、1 つのプロジェクトファイルに含まれる 2 つの異なる解析モデルを使用して最適化を行います。"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:25
+msgid "The first model performs a 2D cooling analysis and uses the maximum temperature as an objective function."
+msgstr "1 つ目のモデルでは 2 次元の冷却解析を行い、最高温度を目的関数として使用します。"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:28
+msgid "The second model performs a 3D eigenvalue analysis and uses the difference between the operating frequency and natural frequency as an objective to maximize."
+msgstr "2 つ目のモデルでは 3 次元の固有値解析を行い、運転周波数と固有振動数の差を最大化する目的関数として使用します。"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:35
+msgid "By using this feature, you can perform thermal analysis and structural analysis simultaneously on the same geometry, enabling optimization that considers both thermal and strength requirements."
+msgstr "この機能を使うことで、例えば同一形状に対する熱解析と構造解析を同時に行い、熱と強度の両方を考慮した最適化が可能になります。"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:43
+msgid "You can set variables, objective functions, and constraints individually for each FEM model. The overall optimization problem integrates the objective functions and constraints from all models."
+msgstr "各 FEM モデルに対して、変数・目的関数・拘束条件を個別に設定することもできます。最適化問題全体はすべてのモデルの目的関数と拘束条件を統合して処理されます。"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:50
+msgid "Design Variables and Analysis Settings"
+msgstr "設計変数と解析設定"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:55
+msgid "Overview of the model and analysis settings. The design variables are shared between the two analysis models."
+msgstr "モデルの概観と解析設定。2 つの解析モデルで、設計変数は共通です。"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:60
+msgid "internal_radius"
+msgstr "internal_radius"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:60
+msgid "The inner radius of the shaft."
+msgstr "軸の内径"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:61
+msgid "cooling_area_radius"
+msgstr "cooling_area_radius"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:61
+msgid "The radius of the cooling area."
+msgstr "冷却領域の半径"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:66
+msgid "Objective Functions"
+msgstr "目的関数"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:71
+msgid "Objective function settings"
+msgstr "目的関数の設定"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:73
+msgid "Maximum Temperature (minimize) - obtained from the 2D thermal-fluid analysis model"
+msgstr "最高温度（最小化）- 2D 熱流体解析モデルから取得"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:74
+msgid "Difference between Operating Frequency and Natural Frequency (maximize) - obtained from the 3D resonance analysis model"
+msgstr "運転周波数と固有振動数の差（最大化）- 3D 共振解析モデルから取得"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:78
+msgid "Execution Result of the Sample"
+msgstr "サンプルコードの実行結果"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:83
+msgid "Screenshot of the result. Increasing each radius to improve cooling performance causes the natural frequency to decrease and approach the operating frequency."
+msgstr "実行結果のスクリーンショット。冷却性能を良くするために各 radius を大きくすると固有振動数が低下し、運転周波数に近づきます。"
+
+#: ../source/advanced_examples/multiple_models/multiple_models.rst:91
+#: ../source/advanced_examples/restart/restart.rst:95
+msgid "When performing effective optimization on real-world problems, a greater number of trials is necessary."
+msgstr "実際の問題で効果的な最適化を行う場合、より多くの試行が必要です。"
+
 #: ../source/advanced_examples/restart/restart.rst:2
 msgid "Restarting Optimization"
 msgstr "最適化のリスタート"
@@ -282,10 +375,6 @@ msgstr "このサンプルでは、中断した最適化を再開する方法を
 #: ../source/advanced_examples/restart/restart.rst:12
 msgid "Keep the :download:`sample project<gal_ex13_parametric.femprj>` and :download:`sample script<gal_ex13_parametric_restart.py>` on same folder."
 msgstr ":download:`サンプルプロジェクト<gal_ex13_parametric.femprj>` と :download:`サンプルコード<gal_ex13_parametric_restart.py>` を同じフォルダに配置してください。"
-
-#: ../source/advanced_examples/restart/restart.rst:20
-msgid "What This Sample Will Do"
-msgstr "このサンプルの動作"
 
 #: ../source/advanced_examples/restart/restart.rst:22
 msgid "For the FEM problem, we will determine the design parameters through random sampling and conduct three analyses."
@@ -349,10 +438,6 @@ msgstr "第一共振周波数 (ターゲット値: 800)"
 #: ../source/advanced_examples/restart/restart.rst:90
 msgid "Screenshot of the result"
 msgstr "実行結果のスクリーンショット"
-
-#: ../source/advanced_examples/restart/restart.rst:95
-msgid "When performing effective optimization on real-world problems, a greater number of trials is necessary."
-msgstr "実際の問題で効果的な最適化を行う場合、より多くの試行が必要です。"
 
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:2
 msgid "Optimization Using a Surrogate Model"
@@ -445,4 +530,73 @@ msgstr "第一共振周波数が 1000 または 2000 の音叉の設計変数を
 #: ../source/advanced_examples/surrogate_model/surrogate_model.rst:120
 msgid "Using these design variables, we recreated the model in Femtet and executed analyses, with results shown in the lower right corner of each figure, allowing for comparison between the surrogate model and FEM results."
 msgstr "これらの設計変数を使用して Femtet でモデルを再現し、解析を実行しました。その結果は各図の右下に示されており、サロゲートモデルと FEM 結果との比較が可能となっています。"
+
+#~ msgid "複数の FEM モデルを用いた最適化"
+#~ msgstr ""
+
+#~ msgid "このサンプルでは、1 つの最適化問題の中で 複数の FEM モデルを同時に使用する方法を説明します。"
+#~ msgstr ""
+
+#~ msgid "サンプルファイル"
+#~ msgstr ""
+
+#~ msgid ":download:`サンプルプロジェクト<cylinder-shaft-cooling.femprj>` と :download:`サンプルスクリプト<optimize_with_multiple_models.py>` は同じフォルダに配置してください。"
+#~ msgstr ""
+
+#~ msgid "このサンプルで行うこと"
+#~ msgstr ""
+
+#~ msgid "このサンプルでは、1 つのプロジェクトファイルに 含まれる 2 つの異なる解析モデルを使用して 最適化を行います。"
+#~ msgstr ""
+
+#~ msgid "1 つ目のモデルでは 2 次元の冷却解析を行い、 最高温度を目的関数として使用します。"
+#~ msgstr ""
+
+#~ msgid "2 つ目のモデルでは 3 次元の固有値解析を行い、 運転周波数と固有振動数の差を最大化する 目的関数として使用します。"
+#~ msgstr ""
+
+#~ msgid "この機能を使うことで、例えば同一形状に対する 熱解析と構造解析を同時に行い、 熱と強度の両方を考慮した最適化が可能になります。"
+#~ msgstr ""
+
+#~ msgid "各 FEM モデルに対して、変数・目的関数・拘束条件を 個別に設定することもできます。最適化問題全体は すべてのモデルの目的関数と拘束条件を統合して 処理されます。"
+#~ msgstr ""
+
+#~ msgid "設計変数と解析設定"
+#~ msgstr ""
+
+#~ msgid "モデルの概観と解析設定。2 つの解析モデルで、設計変数は共通です。"
+#~ msgstr ""
+
+#~ msgid "変数名"
+#~ msgstr ""
+
+#~ msgid "説明"
+#~ msgstr ""
+
+#~ msgid "シャフト内部の半径"
+#~ msgstr ""
+
+#~ msgid "冷却領域の半径"
+#~ msgstr ""
+
+#~ msgid "目的関数"
+#~ msgstr ""
+
+#~ msgid "目的関数の設定"
+#~ msgstr ""
+
+#~ msgid "最高温度（最小化）- 2D 熱流体解析モデルから取得"
+#~ msgstr ""
+
+#~ msgid "運転周波数と固有振動数の差（最大化）- 3D 共振解析モデルから取得"
+#~ msgstr ""
+
+#~ msgid "サンプルの実行結果"
+#~ msgstr ""
+
+#~ msgid "実行結果のスクリーンショット。 冷却性能を良くするために各 radius を大きくすると 固有振動数が低下し、運転周波数に近づきます。"
+#~ msgstr ""
+
+#~ msgid "実際の問題で有効な最適化を行うには、 より多くの試行回数が必要です。"
+#~ msgstr ""
 

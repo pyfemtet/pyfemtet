@@ -116,7 +116,7 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 <dd><p>Name of the Optuna study.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -127,7 +127,7 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 <dd><p>Storage URL or object for the Optuna study.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a> | optuna.storages.BaseStorage</p>
+<dd class="field-odd"><p>str | optuna.storages.BaseStorage</p>
 </dd>
 </dl>
 </dd></dl>
@@ -138,7 +138,7 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 <dd><p>Path to the Optuna study storage.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -160,7 +160,7 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 <dd><p>The class of the Optuna sampler to use.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)">type</a>[optuna.samplers.BaseSampler]</p>
+<dd class="field-odd"><p>type[optuna.samplers.BaseSampler]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -171,7 +171,7 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 <dd><p>Keyword arguments to initialize the sampler.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -182,7 +182,7 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 <dd><p>Number of trials to run in the study.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a> | None</p>
+<dd class="field-odd"><p>int | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -193,7 +193,7 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 <dd><p>Maximum time allowed for the optimization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a> | None</p>
+<dd class="field-odd"><p>float | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -204,7 +204,7 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 <dd><p>List of callback functions to invoke during optimization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -212,8 +212,8 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sampler_class</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><em>type</em></a><em>[</em><em>optuna.samplers.BaseSampler</em><em>]</em><em>, </em><em>optional</em>) – The sampler class for suggesting parameter values. Defaults to TPESampler if None.</p></li>
-<li><p><strong>sampler_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>...</em><em>]</em><em>, </em><em>optional</em>) – Dictionary of keyword arguments for the sampler. Defaults to an empty dictionary.</p></li>
+<li><p><strong>sampler_class</strong> (<em>type</em><em>[</em><em>optuna.samplers.BaseSampler</em><em>]</em><em>, </em><em>optional</em>) – The sampler class for suggesting parameter values. Defaults to TPESampler if None.</p></li>
+<li><p><strong>sampler_kwargs</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>...</em><em>]</em><em>, </em><em>optional</em>) – Dictionary of keyword arguments for the sampler. Defaults to an empty dictionary.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -233,12 +233,12 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – </p></li>
-<li><p><strong>initial_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/numbers.html#numbers.Real" title="(in Python v3.14)"><em>Real</em></a>) – </p></li>
-<li><p><strong>choices</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/numbers.html#numbers.Real" title="(in Python v3.14)"><em>Real</em></a><em>]</em>) – </p></li>
-<li><p><strong>properties</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>...</em><em>] </em><em>| </em><em>None</em>) – </p></li>
-<li><p><strong>pass_to_fem</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – </p></li>
-<li><p><strong>fix</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – </p></li>
+<li><p><strong>name</strong> (<em>str</em>) – </p></li>
+<li><p><strong>initial_value</strong> (<em>str</em><em> | </em><em>Real</em>) – </p></li>
+<li><p><strong>choices</strong> (<em>list</em><em>[</em><em>str</em><em> | </em><em>Real</em><em>]</em>) – </p></li>
+<li><p><strong>properties</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>...</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>pass_to_fem</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>fix</strong> (<em>bool</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -253,14 +253,14 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – </p></li>
-<li><p><strong>initial_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – </p></li>
-<li><p><strong>lower_bound</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> | </em><em>None</em>) – </p></li>
-<li><p><strong>upper_bound</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> | </em><em>None</em>) – </p></li>
-<li><p><strong>step</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> | </em><em>None</em>) – </p></li>
-<li><p><strong>properties</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>...</em><em>] </em><em>| </em><em>None</em>) – </p></li>
-<li><p><strong>pass_to_fem</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – </p></li>
-<li><p><strong>fix</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – </p></li>
+<li><p><strong>name</strong> (<em>str</em>) – </p></li>
+<li><p><strong>initial_value</strong> (<em>float</em>) – </p></li>
+<li><p><strong>lower_bound</strong> (<em>float</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>upper_bound</strong> (<em>float</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>step</strong> (<em>float</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>properties</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>...</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>pass_to_fem</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>fix</strong> (<em>bool</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -271,12 +271,12 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">callbacks</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">callbacks</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id1">
-<span class="sig-name descname"><span class="pre">current_trial</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">optuna.trial.Trial</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">current_trial</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">optuna.trial.Trial</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -286,7 +286,7 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.fidelity">
-<span class="sig-name descname"><span class="pre">fidelity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Fidelity</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.fidelity" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">fidelity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Fidelity</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.fidelity" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -296,12 +296,12 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.include_queued_in_n_trials">
-<span class="sig-name descname"><span class="pre">include_queued_in_n_trials</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.include_queued_in_n_trials" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">include_queued_in_n_trials</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.include_queued_in_n_trials" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id2">
-<span class="sig-name descname"><span class="pre">n_trials</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">n_trials</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -311,32 +311,32 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id3">
-<span class="sig-name descname"><span class="pre">sampler_class</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><span class="pre">optuna.samplers.BaseSampler</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sampler_class</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">type</span><span class="p"><span class="pre">[</span></span><span class="pre">optuna.samplers.BaseSampler</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id4">
-<span class="sig-name descname"><span class="pre">sampler_kwargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></em><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sampler_kwargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.seed">
-<span class="sig-name descname"><span class="pre">seed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.seed" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">seed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.seed" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.solve_condition">
-<span class="sig-name descname"><span class="pre">solve_condition</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyfemtet.opt.history.html#pyfemtet.opt.history.History" title="pyfemtet.opt.history.History"><span class="pre">History</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.solve_condition" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">solve_condition</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyfemtet.opt.history.html#pyfemtet.opt.history.History" title="pyfemtet.opt.history.History"><span class="pre">History</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.solve_condition" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id5">
-<span class="sig-name descname"><span class="pre">storage</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">optuna.storages.BaseStorage</span></em><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">storage</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">optuna.storages.BaseStorage</span></em><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id6">
-<span class="sig-name descname"><span class="pre">storage_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></em><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">storage_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -346,22 +346,22 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.sub_fidelity_models">
-<span class="sig-name descname"><span class="pre">sub_fidelity_models</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">SubFidelityModels</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.sub_fidelity_models" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sub_fidelity_models</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">SubFidelityModels</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.sub_fidelity_models" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.sub_fidelity_name">
-<span class="sig-name descname"><span class="pre">sub_fidelity_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.sub_fidelity_name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sub_fidelity_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.sub_fidelity_name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.termination_condition">
-<span class="sig-name descname"><span class="pre">termination_condition</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyfemtet.opt.history.html#pyfemtet.opt.history.History" title="pyfemtet.opt.history.History"><span class="pre">History</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.termination_condition" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">termination_condition</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyfemtet.opt.history.html#pyfemtet.opt.history.History" title="pyfemtet.opt.history.History"><span class="pre">History</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.termination_condition" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id8">
-<span class="sig-name descname"><span class="pre">timeout</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">timeout</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -376,7 +376,7 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.worker_status_list">
-<span class="sig-name descname"><span class="pre">worker_status_list</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyfemtet.opt.worker_status.html#pyfemtet.opt.worker_status.WorkerStatus" title="pyfemtet.opt.worker_status.WorkerStatus"><span class="pre">WorkerStatus</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.worker_status_list" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">worker_status_list</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pyfemtet.opt.worker_status.html#pyfemtet.opt.worker_status.WorkerStatus" title="pyfemtet.opt.worker_status.WorkerStatus"><span class="pre">WorkerStatus</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.OptunaOptimizer.worker_status_list" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -384,16 +384,16 @@ It manages the study lifecycle, sampler configuration, and trial execution.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.optuna_optimizer.PartialOptimizeACQFConfig">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.optimizer.optuna_optimizer.</span></span><span class="sig-name descname"><span class="pre">PartialOptimizeACQFConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen_candidates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'scipy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout_sec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scipy_minimize_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint_enhancement</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint_scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.html#PartialOptimizeACQFConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.PartialOptimizeACQFConfig" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>gen_candidates</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – </p></li>
-<li><p><strong>timeout_sec</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – </p></li>
-<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – </p></li>
-<li><p><strong>scipy_minimize_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – </p></li>
-<li><p><strong>constraint_enhancement</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – </p></li>
-<li><p><strong>constraint_scaling</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – </p></li>
+<li><p><strong>gen_candidates</strong> (<em>str</em>) – </p></li>
+<li><p><strong>timeout_sec</strong> (<em>float</em>) – </p></li>
+<li><p><strong>method</strong> (<em>str</em>) – </p></li>
+<li><p><strong>scipy_minimize_kwargs</strong> (<em>dict</em>) – </p></li>
+<li><p><strong>constraint_enhancement</strong> (<em>float</em>) – </p></li>
+<li><p><strong>constraint_scaling</strong> (<em>float</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -417,13 +417,13 @@ without prior notice. See <a class="reference external" href="https://github.com
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>candidates_func</strong> (<em>CandidateFunc</em>) – </p></li>
-<li><p><strong>constraints_func</strong> (<em>Callable</em><em>[</em><em>[</em><em>FrozenTrial</em><em>]</em><em>, </em><em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>]</em><em>] </em><em>| </em><em>None</em>) – </p></li>
-<li><p><strong>n_startup_trials</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – </p></li>
-<li><p><strong>consider_running_trials</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – </p></li>
+<li><p><strong>constraints_func</strong> (<em>Callable</em><em>[</em><em>[</em><em>FrozenTrial</em><em>]</em><em>, </em><em>Sequence</em><em>[</em><em>float</em><em>]</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>n_startup_trials</strong> (<em>int</em>) – </p></li>
+<li><p><strong>consider_running_trials</strong> (<em>bool</em>) – </p></li>
 <li><p><strong>independent_sampler</strong> (<em>BaseSampler</em><em> | </em><em>None</em>) – </p></li>
-<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>seed</strong> (<em>int</em><em> | </em><em>None</em>) – </p></li>
 <li><p><strong>device</strong> (<em>torch.device</em><em> | </em><em>None</em>) – </p></li>
-<li><p><strong>observation_noise</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>observation_noise</strong> (<em>float</em><em> | </em><em>str</em><em> | </em><em>None</em>) – </p></li>
 <li><p><strong>partial_optimize_acqf_kwargs</strong> (<a class="reference internal" href="#pyfemtet.opt.optimizer.optuna_optimizer.PartialOptimizeACQFConfig" title="pyfemtet.opt.optimizer.optuna_optimizer.PartialOptimizeACQFConfig"><em>PartialOptimizeACQFConfig</em></a>) – </p></li>
 <li><p><strong>pof_config</strong> (<a class="reference internal" href="#pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig" title="pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig"><em>PoFConfig</em></a>) – </p></li>
 </ul>
@@ -431,12 +431,12 @@ without prior notice. See <a class="reference external" href="https://github.com
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.optuna_optimizer.PoFBoTorchSampler.current_gp_model">
-<span class="sig-name descname"><span class="pre">current_gp_model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">SingleTaskGP</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.PoFBoTorchSampler.current_gp_model" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">current_gp_model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">SingleTaskGP</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.PoFBoTorchSampler.current_gp_model" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.optuna_optimizer.PoFBoTorchSampler.observation_noise">
-<span class="sig-name descname"><span class="pre">observation_noise</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.PoFBoTorchSampler.observation_noise" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">observation_noise</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.PoFBoTorchSampler.observation_noise" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -473,7 +473,7 @@ perspective.</p>
 <li><p><strong>study</strong> (<em>Study</em>) – Target study object.</p></li>
 <li><p><strong>trial</strong> (<em>FrozenTrial</em>) – Target trial object.
 Take a copy before modifying this object.</p></li>
-<li><p><strong>search_space</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>BaseDistribution</em><em>]</em>) – The search space returned by
+<li><p><strong>search_space</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>BaseDistribution</em><em>]</em>) – The search space returned by
 <code class="xref py py-func docutils literal notranslate"><span class="pre">infer_relative_search_space()</span></code>.</p></li>
 </ul>
 </dd>
@@ -481,7 +481,7 @@ Take a copy before modifying this object.</p></li>
 <dd class="field-even"><p>A dictionary containing the parameter names and the values.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>]</p>
+<dd class="field-odd"><p>dict[str, <em>Any</em>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -492,8 +492,8 @@ Take a copy before modifying this object.</p></li>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>feature_dim_bound</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>] </em><em>| </em><em>None</em>) – </p></li>
-<li><p><strong>feature_param</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> | </em><em>ndarray</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>feature_dim_bound</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>feature_param</strong> (<em>float</em><em> | </em><em>ndarray</em><em> | </em><em>None</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -504,42 +504,42 @@ Take a copy before modifying this object.</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyfemtet.opt.optimizer.optuna_optimizer.</span></span><span class="sig-name descname"><span class="pre">PoFConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">consider_pof:</span> <span class="pre">'bool'</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">consider_explicit_hard_constraint:</span> <span class="pre">'bool'</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_states_to_consider_pof:</span> <span class="pre">'list[PFTrialState]'</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feasibility_cdf_threshold:</span> <span class="pre">'float</span> <span class="pre">|</span> <span class="pre">str'</span> <span class="pre">=</span> <span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feasibility_noise:</span> <span class="pre">'float</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None'</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_hard_constraints_from_gp:</span> <span class="pre">'bool'</span> <span class="pre">=</span> <span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/pof_botorch_sampler.html#PoFConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>consider_pof</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – </p></li>
-<li><p><strong>consider_explicit_hard_constraint</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – </p></li>
-<li><p><strong>_states_to_consider_pof</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference internal" href="pyfemtet.opt.history.html#pyfemtet.opt.history.TrialState" title="pyfemtet.opt.history._history.TrialState"><em>TrialState</em></a><em>]</em>) – </p></li>
-<li><p><strong>feasibility_cdf_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – </p></li>
-<li><p><strong>feasibility_noise</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – </p></li>
-<li><p><strong>remove_hard_constraints_from_gp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – </p></li>
+<li><p><strong>consider_pof</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>consider_explicit_hard_constraint</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>_states_to_consider_pof</strong> (<em>list</em><em>[</em><a class="reference internal" href="pyfemtet.opt.history.html#pyfemtet.opt.history.TrialState" title="pyfemtet.opt.history._history.TrialState"><em>TrialState</em></a><em>]</em>) – </p></li>
+<li><p><strong>feasibility_cdf_threshold</strong> (<em>float</em><em> | </em><em>str</em>) – </p></li>
+<li><p><strong>feasibility_noise</strong> (<em>float</em><em> | </em><em>str</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>remove_hard_constraints_from_gp</strong> (<em>bool</em>) – </p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig.consider_explicit_hard_constraint">
-<span class="sig-name descname"><span class="pre">consider_explicit_hard_constraint</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig.consider_explicit_hard_constraint" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">consider_explicit_hard_constraint</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig.consider_explicit_hard_constraint" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig.consider_pof">
-<span class="sig-name descname"><span class="pre">consider_pof</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig.consider_pof" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">consider_pof</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig.consider_pof" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig.feasibility_cdf_threshold">
-<span class="sig-name descname"><span class="pre">feasibility_cdf_threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.5</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig.feasibility_cdf_threshold" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">feasibility_cdf_threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.5</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig.feasibility_cdf_threshold" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig.feasibility_noise">
-<span class="sig-name descname"><span class="pre">feasibility_noise</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig.feasibility_noise" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">feasibility_noise</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig.feasibility_noise" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig.remove_hard_constraints_from_gp">
-<span class="sig-name descname"><span class="pre">remove_hard_constraints_from_gp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig.remove_hard_constraints_from_gp" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">remove_hard_constraints_from_gp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pyfemtet.opt.optimizer.optuna_optimizer.PoFConfig.remove_hard_constraints_from_gp" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
