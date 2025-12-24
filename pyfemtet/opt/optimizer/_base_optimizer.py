@@ -650,6 +650,10 @@ class AbstractOptimizer(OptimizationData):
         self.fem_manager.global_data.fem = self.fem_manager.all_fems_as_a_fem
         self.fem_manager.append(value)
 
+    def add_fem(self, fem: AbstractFEMInterface) -> OptimizationDataPerFEM:
+        show_experimental_warning('add_fem', logger)
+        return self.fem_manager.append(fem)
+
     # @property
     # def global_data(self) -> GlobalOptimizationData:
     #     return self.fem_manager.global_data

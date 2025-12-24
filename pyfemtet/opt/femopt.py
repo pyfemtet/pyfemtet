@@ -19,7 +19,7 @@ from pyfemtet.opt.problem.problem import *
 from pyfemtet.opt.problem.variable_manager import *
 from pyfemtet.opt.interface import *
 from pyfemtet.opt.optimizer import *
-from pyfemtet.opt.optimizer._base_optimizer import DIRECTION
+from pyfemtet.opt.optimizer._base_optimizer import DIRECTION, OptimizationDataPerFEM
 from pyfemtet.opt.history import History
 from pyfemtet.logger import get_module_logger
 from pyfemtet.opt.visualization.history_viewer._process_monitor._application import (
@@ -73,6 +73,9 @@ class FEMOpt:
         self.monitor_info: dict[str, str | int | None] = dict(
             host=None, port=None,
         )
+
+    def add_fem(self, fem: AbstractFEMInterface) -> OptimizationDataPerFEM:
+        return self.opt.fem_manager.append(fem)
 
     def add_constant_value(
             self,

@@ -60,7 +60,7 @@ def main():
     # Add it to femopt.
     # The return value "ctx2" is the optimization problem settings
     # related in the appended FEM.
-    ctx2 = femopt.opt.fem_manager.append(fem2)
+    ctx2 = femopt.add_fem(fem2)
 
     # Then we add objective to the ctx instead of femopt.
     # By this, the Femtet object related in fem2 is passed
