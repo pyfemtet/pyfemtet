@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-04 10:39+0900\n"
+"POT-Creation-Date: 2025-12-25 16:51+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -343,8 +343,8 @@ msgid "Execution result of gau_ex08_parametric.py. The horizontal axis is the nu
 msgstr "gau_ex08_parametric.py の実行結果。 横軸が試行回数、縦軸が自己インダクタンスです。"
 
 #: ../source/examples/gau_ex08/gau_ex08.rst:59
-msgid "After 15 iterations, the self-inductance was calculated to be 0.101 µF."
-msgstr "15 回の反復計算の結果、自己インダクタンスは 0.101 μF となります。"
+msgid "After 15 iterations, the self-inductance was calculated to be 0.101 µH."
+msgstr "15 回の反復計算の結果、自己インダクタンスは 0.101 μH となります。"
 
 #: ../source/examples/her_ex40/her_ex40.rst:2
 msgid "Resonant frequency of a circular patch antenna"

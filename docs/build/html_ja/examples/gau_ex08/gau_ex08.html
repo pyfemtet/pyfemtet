@@ -180,7 +180,7 @@
 <span class="linenos">27</span>    <span class="n">Gogh</span> <span class="o">=</span> <span class="n">Femtet</span><span class="o">.</span><span class="n">Gogh</span>
 <span class="linenos">28</span>
 <span class="linenos">29</span>    <span class="n">coil_name</span> <span class="o">=</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Gauss</span><span class="o">.</span><span class="n">GetCoilList</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-<span class="linenos">30</span>    <span class="k">return</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Gauss</span><span class="o">.</span><span class="n">GetL</span><span class="p">(</span><span class="n">coil_name</span><span class="p">,</span> <span class="n">coil_name</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e6</span>  <span class="c1"># 単位: uF</span>
+<span class="linenos">30</span>    <span class="k">return</span> <span class="n">Gogh</span><span class="o">.</span><span class="n">Gauss</span><span class="o">.</span><span class="n">GetL</span><span class="p">(</span><span class="n">coil_name</span><span class="p">,</span> <span class="n">coil_name</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e6</span>  <span class="c1"># 単位: uH</span>
 <span class="linenos">31</span>
 <span class="linenos">32</span>
 <span class="linenos">33</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
@@ -202,8 +202,8 @@
 <span class="linenos">49</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="s2">&quot;n_turns&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 <span class="linenos">50</span>
 <span class="linenos">51</span>    <span class="c1"># 目的関数を最適化問題に追加</span>
-<span class="linenos">52</span>    <span class="c1"># 目標の自己インダクタンスは 0.1 μF です。</span>
-<span class="linenos">53</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">fun</span><span class="o">=</span><span class="n">inductance</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;自己インダクタンス (μF)&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="linenos">52</span>    <span class="c1"># 目標の自己インダクタンスは 0.1 μH です。</span>
+<span class="linenos">53</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">add_objective</span><span class="p">(</span><span class="n">fun</span><span class="o">=</span><span class="n">inductance</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;自己インダクタンス (μH)&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 <span class="linenos">54</span>
 <span class="linenos">55</span>    <span class="c1"># 最適化を実行</span>
 <span class="linenos">56</span>    <span class="n">femopt</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
@@ -220,7 +220,7 @@
 <p><span class="caption-text">gau_ex08_parametric.py の実行結果。 横軸が試行回数、縦軸が自己インダクタンスです。</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
 </figcaption>
 </figure>
-<p>15 回の反復計算の結果、自己インダクタンスは 0.101 μF となります。</p>
+<p>15 回の反復計算の結果、自己インダクタンスは 0.101 μH となります。</p>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
 <p>Femtet, PyFemtet および依存する最適化エンジンのバージョンにより、結果は多少異なる場合があります。</p>

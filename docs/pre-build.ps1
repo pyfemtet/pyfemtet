@@ -49,7 +49,7 @@ powershell "$SOURCE_DIR\pages\images\apply_locale.ps1" en
 uv run --no-sync python -m sphinx -T -b html -d $DOCTREE_DIR -D language=en $SOURCE_DIR $HTML_DIR
 
 # Show in browser
-start "$HTML_DIR" + "\index.html"
+start "$HTML_DIR\index.html"
 
 # copy and overwrite with Japanese sample files
 Copy-Item -Path "$SAMPLES_SOURCE_JP\*" -Destination $SAMPLES_ON_DOC_SOURCE -Force -Recurse
@@ -85,5 +85,4 @@ powershell "$SOURCE_DIR\pages\images\apply_locale.ps1" ja
 uv run --no-sync python -m sphinx -T -b html -d $DOCTREE_DIR_JA -D language=ja_JP $SOURCE_DIR $HTML_DIR_JA
 
 # Show in browser
-start "$HTML_DIR_JP" + "\index.html"
-
+start "$HTML_DIR_JA\index.html"

@@ -27,7 +27,7 @@ def inductance(Femtet):
     Gogh = Femtet.Gogh
 
     coil_name = Gogh.Gauss.GetCoilList()[0]
-    return Gogh.Gauss.GetL(coil_name, coil_name) * 1e6  # 単位: uF
+    return Gogh.Gauss.GetL(coil_name, coil_name) * 1e6  # 単位: uH
 
 
 if __name__ == '__main__':
@@ -49,8 +49,8 @@ if __name__ == '__main__':
     femopt.add_parameter("n_turns", 5, lower_bound=1, upper_bound=5)
 
     # 目的関数を最適化問題に追加
-    # 目標の自己インダクタンスは 0.1 μF です。
-    femopt.add_objective(fun=inductance, name='自己インダクタンス (μF)', direction=0.1)
+    # 目標の自己インダクタンスは 0.1 μH です。
+    femopt.add_objective(fun=inductance, name='自己インダクタンス (μH)', direction=0.1)
 
     # 最適化を実行
     femopt.set_random_seed(42)

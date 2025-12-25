@@ -56,7 +56,7 @@ Execution Result of the Sample Code
 
    Execution result of gau_ex08_parametric.py. The horizontal axis is the number of iterations, and the vertical axis is self-inductance.
 
-After 15 iterations, the self-inductance was calculated to be 0.101 µF.
+After 15 iterations, the self-inductance was calculated to be 0.101 µH.
 
 .. note::
 
