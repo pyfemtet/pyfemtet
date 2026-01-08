@@ -51,7 +51,7 @@ def test_load_single_excel():
                 assert var.upper_bound == 10
                 assert var.step is None
 
-            elif var.name == 'z':
+            elif var.name == 'z_str':
                 assert isinstance(var, CategoricalParameter)
                 assert var.value == 'A'
                 assert var.choices == ['A', 'B', 'C']
@@ -123,6 +123,77 @@ def test_run_multiple_excel():
         )
 
 
+def test_run_multiple_fem_excel():
+    fem1 = ExcelInterface(
+        input_xlsm_path=get(__file__, 'test_excel_interface.xlsm'),
+        input_sheet_name='設計変数',
+        output_sheet_name='目的関数',
+        constraint_sheet_name='拘束関数',
+        visible=True,
+        interactive=True,
+        display_alerts=True,
+    )
+
+    fem2 = ExcelInterface(
+        input_xlsm_path=get(__file__, "test_excel_interface.xlsm"),
+        input_sheet_name="input",
+        output_sheet_name="output",
+        procedure_xlsm_path=get(__file__, "test_excel_interface.xlsm"),
+        procedure_name="update_output_macro",
+        setup_xlsm_path=get(__file__, "test_excel_control_femtet.xlsm"),
+        setup_procedure_name="PrePostProcessing.setup",
+        teardown_xlsm_path=get(__file__, "test_excel_control_femtet.xlsm"),
+        teardown_procedure_name="PrePostProcessing.teardown",
+        visible=True,
+        interactive=True,
+        display_alerts=True,
+    )
+
+    with closing(fem1):
+        with closing(fem2):
+            opt = AbstractOptimizer()
+            _ctx1 = opt.add_fem(fem1)
+            _ctx2 = opt.add_fem(fem2)
+
+            opt.fem_manager.all_fems_as_a_fem._setup_before_parallel()
+            opt._finalize()
+            opt.fem_manager.all_fems_as_a_fem._setup_after_parallel(opt)
+
+            x = NumericParameter()
+            x.name = 'x'
+            x.value = .7
+            x.lower_bound = None
+            x.upper_bound = None
+            x.step = None
+            x.pass_to_fem = True
+
+            y = NumericParameter()
+            y.name = 'y'
+            y.value = .7
+            y.lower_bound = None
+            y.upper_bound = None
+            y.step = None
+            y.pass_to_fem = True
+
+            z = NumericParameter()
+            z.name = 'z'
+            z.value = .7
+            z.lower_bound = None
+            z.upper_bound = None
+            z.step = None
+            z.pass_to_fem = True
+
+            z_str = CategoricalParameter()
+            z_str.name = 'z_str'
+            z_str.value = 'A'
+            z_str.choices = ['A', 'B', 'C']
+            z_str.pass_to_fem = True
+
+            ss = opt._get_solve_set()
+            ss.solve(dict(x=x, y=y, z=z, z_str=z_str))
+
+
 if __name__ == '__main__':
     # test_load_single_excel()
     test_run_multiple_excel()
+    # test_run_multiple_fem_excel()

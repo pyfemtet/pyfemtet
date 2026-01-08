@@ -399,14 +399,19 @@ class ExcelInterface(COMInterface):
         # 少なくともスレッドが異なるので
         # 現在のスレッドのオブジェクトに参照しなおす
         obj: Objective
-        for obj_name, obj in opt.objectives.items():
-            if isinstance(obj.fun, _ScapeGoatObjective):
-                opt.objectives[obj_name].fun = self.objective_from_excel
+        for ctx in opt.fem_manager.contexts:
+            # 自身に関連する目的関数のみ参照を直す
+            if id(ctx.fem) == id(self):
+                for obj_name, obj in ctx.objectives.items():
+                    if isinstance(obj.fun, _ScapeGoatObjective):
+                        obj.fun = self.objective_from_excel
 
         cns: Constraint
-        for cns_name, cns in opt.constraints.items():
-            if isinstance(cns.fun, _ScapeGoatObjective):
-                opt.constraints[cns_name].fun = self.constraint_from_excel
+        for ctx in opt.fem_manager.contexts:
+            if id(ctx.fem) == id(self):
+                for cns_name, cns in opt.constraints.items():
+                    if isinstance(cns.fun, _ScapeGoatObjective):
+                        cns.fun = self.constraint_from_excel
 
         # excel の setup 関数を必要なら実行する
         if self.setup_procedure_name is not None:
