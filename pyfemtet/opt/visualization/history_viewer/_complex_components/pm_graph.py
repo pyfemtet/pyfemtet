@@ -387,12 +387,12 @@ class PredictionModelGraph(AbstractPage):
 
             # load history
             if self.application.history is None:
-                logger.error(Msg.ERR_NO_HISTORY_SELECTED)
+                logger.info(Msg.INFO_NO_HISTORY_SELECTED)
                 # to re-enable buttons, fire callback chain
                 return (
                     no_update,
                     self.CommandState.ready.value,
-                    self.alert_region.create_alerts(Msg.ERR_NO_HISTORY_SELECTED),
+                    self.alert_region.create_alerts(Msg.INFO_NO_HISTORY_SELECTED),
                 )
             # prm_names = self.application.history.prm_names
 
@@ -526,7 +526,7 @@ class PredictionModelGraph(AbstractPage):
 
             # load history
             if self.application.history is None:
-                logger.error(Msg.ERR_NO_HISTORY_SELECTED)
+                logger.info(Msg.INFO_NO_HISTORY_SELECTED)
                 raise PreventUpdate
 
             # add dropdown item to dropdown 1, 2 (input)
@@ -665,7 +665,7 @@ class PredictionModelGraph(AbstractPage):
 
             # load history
             if self.application.history is None:
-                logger.error(Msg.ERR_NO_HISTORY_SELECTED)
+                logger.info(Msg.INFO_NO_HISTORY_SELECTED)
                 raise PreventUpdate
             prm_names = self.application.history.prm_names
             obj_names = self.application.history.obj_names

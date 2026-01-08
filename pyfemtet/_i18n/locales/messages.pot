@@ -1,14 +1,14 @@
 # Translations template for PROJECT.
-# Copyright (C) 2025 ORGANIZATION
+# Copyright (C) 2026 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-05-20 11:58+0900\n"
+"POT-Creation-Date: 2026-01-08 20:07+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -92,7 +92,7 @@ msgstr ""
 msgid "No bounds specified."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:56 pyfemtet/opt/femopt.py:426
+#: pyfemtet/_i18n/messages.py:56 pyfemtet/opt/femopt.py:493
 msgid "The optimization is now complete. You can view the results on the monitor until you press Enter to exit the program."
 msgstr ""
 
@@ -109,534 +109,530 @@ msgid "Model update failed."
 msgstr ""
 
 #: pyfemtet/_i18n/messages.py:62
-#: pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:358
-msgid "It was detected that the configuration of Femtet python macro constants has not been completed. The configuration was done automatically (python -m win32com.client.makepy FemtetMacro). Please restart the program. If the error persists, please run \"py -m win32com.client.makepy FemtetMacro\" or \"python -m win32com.client.makepy FemtetMacro\" on the command prompt."
-msgstr ""
-
-#: pyfemtet/_i18n/messages.py:63
-#: pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:385
+#: pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:430
 msgid "Failed to connect to Femtet."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:68
+#: pyfemtet/_i18n/messages.py:67
 #, python-brace-format
 msgid "The Femtet process crashed and Python failed to restore Femtet. API: {name}"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:77
+#: pyfemtet/_i18n/messages.py:76
 #, python-brace-format
 msgid "An abnormal termination of the Femtet process has been detected. Recovery will be attempted. API: {name}"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:83
+#: pyfemtet/_i18n/messages.py:82
 msgid "Femtet has been restarted and will perform analysis and attempt to recover."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:84
+#: pyfemtet/_i18n/messages.py:83
 msgid "If you specify 'new' as the 'connect_method' argument, set the 'femprj_path' argument to existing femprj file path."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:85
+#: pyfemtet/_i18n/messages.py:84
 msgid "The specified variable is not included in the Femtet analysis model. Note the capitalization of the variable."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:86
+#: pyfemtet/_i18n/messages.py:85
 msgid "The following APIs are not accessible: "
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:87
+#: pyfemtet/_i18n/messages.py:86
 msgid "Macros may not be enabled in the installed version of Femtet. Please run the \"Enable Macros\" command from the start menu with administrator privileges in the same version of Femtet that is installed."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:88
+#: pyfemtet/_i18n/messages.py:87
 msgid "No analysis model is open"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:89
+#: pyfemtet/_i18n/messages.py:88
 msgid "The analysis model does not contain any variables."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:90
+#: pyfemtet/_i18n/messages.py:89
 msgid "Failed to update variables:"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:91
+#: pyfemtet/_i18n/messages.py:90
 msgid "The specified variable is not included in the analysis model and will be ignored."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:92
+#: pyfemtet/_i18n/messages.py:91
 msgid "Model history re-execute failed."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:93
+#: pyfemtet/_i18n/messages.py:92
 msgid "Model redraw failed."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:94
+#: pyfemtet/_i18n/messages.py:93
 msgid "Mesh generation failed"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:95
+#: pyfemtet/_i18n/messages.py:94
 msgid "Parametric solve failed"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:96
+#: pyfemtet/_i18n/messages.py:95
 msgid "Solve failed."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:97
+#: pyfemtet/_i18n/messages.py:96
 msgid "Failed to open result."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:98
-#: pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:241
+#: pyfemtet/_i18n/messages.py:97
+#: pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:244
 msgid "Failed to close Femtet."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:99
+#: pyfemtet/_i18n/messages.py:98
 msgid "Failed to save result (.pdt) file."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:100
+#: pyfemtet/_i18n/messages.py:99
 msgid "Failed to save screenshot (.jpg)."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:101
+#: pyfemtet/_i18n/messages.py:100
 msgid "Screenshot (.jpg) is not found."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:102
+#: pyfemtet/_i18n/messages.py:101
 msgid "Failed to update model in solidworks."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:103
+#: pyfemtet/_i18n/messages.py:102
 msgid "Probability of feasibility is less than threshold."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:104
-#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:936
+#: pyfemtet/_i18n/messages.py:103
+#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:951
 msgid "Terminating Excel process..."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:105
-#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:955
+#: pyfemtet/_i18n/messages.py:104
+#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:970
 msgid "Excel process is terminated."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:106
-#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:961
+#: pyfemtet/_i18n/messages.py:105
+#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:976
 msgid "Restore Femtet setting of autosave."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:107
+#: pyfemtet/_i18n/messages.py:106
 msgid "Failed to make output from Femtet. Please check output settings of Parametric Analysis."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:111
+#: pyfemtet/_i18n/messages.py:110
 msgid "The following features are not supported by the specified optimization method. "
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:112
+#: pyfemtet/_i18n/messages.py:111
 msgid "The parameter set does not match the one added with add_init_parameter."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:113
+#: pyfemtet/_i18n/messages.py:112
 msgid "An exception has occurred during FEM update. Current parameters are: "
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:114
+#: pyfemtet/_i18n/messages.py:113
 msgid "The constraints were not satisfied for the following sets of variables:"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:115
+#: pyfemtet/_i18n/messages.py:114
 msgid "Current parameter set cannot update FEM and this optimization method cannot skip current parameter set. The optimization process will be terminated."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:116
+#: pyfemtet/_i18n/messages.py:115
 msgid "Optimization has been interrupted. Note that you cannot acquire the OptimizationResult in case of `trust-constr`, `TNC`, `SLSQP` or `COBYLA`."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:117
+#: pyfemtet/_i18n/messages.py:116
 msgid "You can use parameter constraint only with BoTorchSampler."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:118
+#: pyfemtet/_i18n/messages.py:117
 msgid "Scipy is deterministic, so whether you set a seed or not will not change the results."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:119
+#: pyfemtet/_i18n/messages.py:118
 msgid "Start to candidate new parameter set with constraints. This process may take a long time."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:120
+#: pyfemtet/_i18n/messages.py:119
 msgid "Updating FEM parameter during evaluating constraints take a long time. Please consider not to use FEM variables in constraint functions and set `update_fem` to False."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:126
-#: pyfemtet/opt/optimizer/optuna_optimizer/_optuna_optimizer.py:470
+#: pyfemtet/_i18n/messages.py:125
+#: pyfemtet/opt/optimizer/optuna_optimizer/_optuna_optimizer.py:657
 #, python-brace-format
 msgid "The given argument {key} is not included in ones of {sampler_name}. {key} is ignored."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:134
+#: pyfemtet/_i18n/messages.py:133
 msgid "Sometimes Nelder-Mead cannot start optimization with the initial condition what is same with lower bounds or upper bounds."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:139
+#: pyfemtet/_i18n/messages.py:138
 msgid "Cannot use categorical parameter with ScipyOptimizer"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:142
+#: pyfemtet/_i18n/messages.py:141
 msgid ""
 "Hard constraint violation! scipy cannot continue optimization. Only `SLSQP` supports optimization with hard constraint optimization problem. If you see this message even if you are using it, please try to following:\n"
 "- Use small `eps` by `options` argument.\n"
 "- Set `constraint_enhancement`to the value that it larger than the variation of the constraint function when input variables within the range of `eps`."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:162
+#: pyfemtet/_i18n/messages.py:161
 msgid "ScipyOptimizer cannot continue optimization when encountered the input variables that break FEM model."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:168
+#: pyfemtet/_i18n/messages.py:167
 msgid "ScipyOptimizer cannot skip solve."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:172
+#: pyfemtet/_i18n/messages.py:171
 #, python-brace-format
 msgid "{method} cannot handle hard constraint."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:175
+#: pyfemtet/_i18n/messages.py:174
 msgid "SLSQP cannot handle soft constraint. The constraint is handled as a hard one."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:181
+#: pyfemtet/_i18n/messages.py:180
 #: pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/enable_nonlinear_constraint.py:72
 msgid "Accessing FEM API inside hard constraint function may be very slow."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:184
-#: pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/enable_nonlinear_constraint.py:211
+#: pyfemtet/_i18n/messages.py:183
+#: pyfemtet/opt/optimizer/optuna_optimizer/_pof_botorch/enable_nonlinear_constraint.py:215
 msgid "gen_batch_initial_conditions() failed to generate feasible initial conditions for acquisition function optimization sub-problem, so trying to use random feasible parameters as initial conditions.The constraint functions or solutions spaces may be too complicated."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:195
+#: pyfemtet/_i18n/messages.py:194
 msgid "Connect to Femtet"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:196
+#: pyfemtet/_i18n/messages.py:195
 msgid "Analysis model name described in csv does not exist in project."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:197
+#: pyfemtet/_i18n/messages.py:196
 msgid "History csv is not read yet. Open your project manually."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:198
+#: pyfemtet/_i18n/messages.py:197
 msgid "Cannot read project data from csv. Open your project manually."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:199
+#: pyfemtet/_i18n/messages.py:198
 msgid ".femprj file described in csv is not found. Open your project manually."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:200
+#: pyfemtet/_i18n/messages.py:199
 msgid "Analysis model name is not specified. Open your model in the project manually."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:202
+#: pyfemtet/_i18n/messages.py:201
 msgid "Constraint"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:203
+#: pyfemtet/_i18n/messages.py:202
+#: pyfemtet/opt/visualization/plotter/main_figure_creator.py:61
 msgid "feasible"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:204
+#: pyfemtet/_i18n/messages.py:203
+#: pyfemtet/opt/visualization/plotter/main_figure_creator.py:63
 msgid "infeasible"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:205
+#: pyfemtet/_i18n/messages.py:204
+#: pyfemtet/opt/visualization/plotter/main_figure_creator.py:27
 msgid "Optimality"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:206
+#: pyfemtet/_i18n/messages.py:205
+#: pyfemtet/opt/visualization/plotter/main_figure_creator.py:35
 msgid "non dominated"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:207
+#: pyfemtet/_i18n/messages.py:206
+#: pyfemtet/opt/visualization/plotter/main_figure_creator.py:40
 msgid "dominated"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:208
+#: pyfemtet/_i18n/messages.py:207
 msgid "Hypervolume Plot"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:209
+#: pyfemtet/_i18n/messages.py:208
 msgid "Objective Plot"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:210
+#: pyfemtet/_i18n/messages.py:209
 msgid "Multi Objective Pair Plot"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:211
+#: pyfemtet/_i18n/messages.py:210
 msgid "Succeeded trial number"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:212
+#: pyfemtet/_i18n/messages.py:211
 msgid "All solutions"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:213
+#: pyfemtet/_i18n/messages.py:212
 msgid "Transition of<br>optimal solutions"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:214
+#: pyfemtet/_i18n/messages.py:213
 msgid "Target value"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:216
+#: pyfemtet/_i18n/messages.py:215
 msgid "Objectives"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:217
+#: pyfemtet/_i18n/messages.py:216
 msgid "Objectives (all)"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:219
-#: pyfemtet/opt/visualization/plotter/pm_graph_creator.py:343
-#: pyfemtet/opt/visualization/plotter/pm_graph_creator.py:350
+#: pyfemtet/_i18n/messages.py:218
+#: pyfemtet/opt/visualization/plotter/pm_graph_creator.py:373
+#: pyfemtet/opt/visualization/plotter/pm_graph_creator.py:383
 msgid "Prediction Model"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:220
+#: pyfemtet/_i18n/messages.py:219
 msgid " Recalculate Model"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:221
+#: pyfemtet/_i18n/messages.py:220
 msgid " Redraw graph"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:222
+#: pyfemtet/_i18n/messages.py:221
 msgid "Parameter"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:223
+#: pyfemtet/_i18n/messages.py:222
 msgid "Parameter2"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:224
+#: pyfemtet/_i18n/messages.py:223
 msgid "Objective"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:225
-msgid "No history selected."
+#: pyfemtet/_i18n/messages.py:224
+msgid "The history CSV has not been loaded yet. Please select a CSV file from the viewer screen first."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:226
+#: pyfemtet/_i18n/messages.py:225
 msgid "No FEM result (yet)."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:227
+#: pyfemtet/_i18n/messages.py:226
 msgid "Prediction model is not calculated yet."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:228
+#: pyfemtet/_i18n/messages.py:227
 msgid "Cannot select same parameter"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:229
+#: pyfemtet/_i18n/messages.py:228
 msgid "3D graph (two or more parameters required)"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:231
+#: pyfemtet/_i18n/messages.py:230
 msgid "Prediction Model of Objective"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:232
+#: pyfemtet/_i18n/messages.py:231
 msgid "prediction model"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:233
+#: pyfemtet/_i18n/messages.py:232
 msgid "std. dev. of model"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:235
+#: pyfemtet/_i18n/messages.py:234
 msgid "Progress"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:236
-#: pyfemtet/opt/visualization/plotter/pm_graph_creator.py:168
-#: pyfemtet/opt/visualization/plotter/pm_graph_creator.py:193
+#: pyfemtet/_i18n/messages.py:235
+#: pyfemtet/opt/visualization/plotter/pm_graph_creator.py:169
+#: pyfemtet/opt/visualization/plotter/pm_graph_creator.py:194
 msgid "Prediction"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:237
+#: pyfemtet/_i18n/messages.py:236
 msgid "Workers"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:238
+#: pyfemtet/_i18n/messages.py:237
 msgid "Details"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:240
+#: pyfemtet/_i18n/messages.py:239
 msgid "Optimization status will be shown here."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:241
+#: pyfemtet/_i18n/messages.py:240
 msgid "Auto-update graph"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:242
+#: pyfemtet/_i18n/messages.py:241
 msgid "Interrupt Optimization"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:244
+#: pyfemtet/_i18n/messages.py:243
 msgid "Result"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:246
+#: pyfemtet/_i18n/messages.py:245
 msgid "Open Result in Femtet"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:247
+#: pyfemtet/_i18n/messages.py:246
 msgid "Reconstruct Model"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:248
+#: pyfemtet/_i18n/messages.py:247
 msgid "Drag and drop or select csv file"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:249
+#: pyfemtet/_i18n/messages.py:248
 msgid "Connection to Femtet is not established. Launch Femtet and Open a project."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:250
+#: pyfemtet/_i18n/messages.py:249
 msgid "No result plot is selected."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:251
+#: pyfemtet/_i18n/messages.py:250
 msgid "The femprj file path in the history csv is not found or valid."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:252
+#: pyfemtet/_i18n/messages.py:251
 msgid "The model name in the history csv is not found."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:253
+#: pyfemtet/_i18n/messages.py:252
 msgid ".pdt file is not found. Please check the .Results folder. Note that .pdt file save mode depends on the `save_pdt` argument of FemtetInterface in optimization script(default to `all`)."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:258
+#: pyfemtet/_i18n/messages.py:257
 msgid "Failed to open "
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:259
-msgid "Specified model is not in current project. Please check opened project. For example, not \"analysis model only\" but your .femprj file."
-msgstr ""
-
-#: pyfemtet/_i18n/messages.py:262
+#: pyfemtet/_i18n/messages.py:258
 msgid ".femprj file path of the history csv is invalid. Please certify matching between csv and opening .femprj file."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:263
+#: pyfemtet/_i18n/messages.py:259
 msgid "Analysis model name of the history csv is invalid. Please certify matching between csv and opening analysis model."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:264
+#: pyfemtet/_i18n/messages.py:260
 msgid "Analysis model name of the history csv and opened in Femtet is inconsistent. Please certify matching between csv and opening analysis model."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:265
+#: pyfemtet/_i18n/messages.py:261
 msgid "tutorial mode"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:266
+#: pyfemtet/_i18n/messages.py:262
 msgid "Load Sample CSV"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:267
+#: pyfemtet/_i18n/messages.py:263
 msgid "Load CSV"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:268
+#: pyfemtet/_i18n/messages.py:264
 msgid "Open your optimization result. Then connecting to femtet will start automatically. Note that in tutorial mode, this button loads the ready-made sample csv and open sample femprj."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:270
+#: pyfemtet/_i18n/messages.py:266
 msgid "Main Graph"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:271
+#: pyfemtet/_i18n/messages.py:267
 msgid "Here the optimization history is shown. Each plot represents single FEM result. You can pick a result to open the corresponding result in Femtet. "
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:274
+#: pyfemtet/_i18n/messages.py:270
 msgid "Open Result"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:275
+#: pyfemtet/_i18n/messages.py:271
 msgid "After pick a point in the main graph, This button shows the corresponding FEM result in Femtet."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:277
+#: pyfemtet/_i18n/messages.py:273
 msgid "Re-connect to Femtet."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:278
+#: pyfemtet/_i18n/messages.py:274
 msgid "Sample csv is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:279
+#: pyfemtet/_i18n/messages.py:275
 msgid "Sample femprj file is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:280
+#: pyfemtet/_i18n/messages.py:276
 msgid "Sample femprj result folder is not found. Please consider to re-install pyfemtet by `py -m pip install pyfemtet -U --force-reinstall`"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:282
+#: pyfemtet/_i18n/messages.py:278
 msgid "Loading data..."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:283
+#: pyfemtet/_i18n/messages.py:279
 msgid "Plots of objectives versus trials"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:284
+#: pyfemtet/_i18n/messages.py:280
 msgid "The vertical axis is the objective, and the horizontal axis is the number of trials."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:285
+#: pyfemtet/_i18n/messages.py:281
 msgid "Parallel coordinate plots"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:286
+#: pyfemtet/_i18n/messages.py:282
 msgid "The vertical axis is an objective or parameters, and one polyline indicates one result."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:287
+#: pyfemtet/_i18n/messages.py:283
 msgid "The heatmap of objectives"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:288
+#: pyfemtet/_i18n/messages.py:284
 msgid "The axes are parameters, and the color shows objective value."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:289
+#: pyfemtet/_i18n/messages.py:285
 msgid "The response of an objective versus one parameter"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:290
+#: pyfemtet/_i18n/messages.py:286
 msgid "The vertical axis is objective, and the horizontal axis is parameter."
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:291
+#: pyfemtet/_i18n/messages.py:287
 msgid "The importance of parameters evaluated by fANOVA"
 msgstr ""
 
-#: pyfemtet/_i18n/messages.py:292
+#: pyfemtet/_i18n/messages.py:288
 msgid "The normalized relative importance of parameters. Please note that the importance is calculated from the overall relationship of the input-output response, rather than from a specific solution."
 msgstr ""
 
@@ -653,127 +649,139 @@ msgstr ""
 msgid "Failed to close Femtet in 30 seconds."
 msgstr ""
 
-#: pyfemtet/_util/helper.py:48
+#: pyfemtet/_util/helper.py:52
 #, python-brace-format
 msgid "{name} does not finished in {timeout} seconds."
 msgstr ""
 
-#: pyfemtet/opt/femopt.py:194
+#: pyfemtet/opt/femopt.py:257
 #, python-brace-format
 msgid "===== pyfemtet version {ver} ====="
 msgstr ""
 
-#: pyfemtet/opt/femopt.py:216
+#: pyfemtet/opt/femopt.py:281
 msgid "Launching processes..."
 msgstr ""
 
-#: pyfemtet/opt/femopt.py:223
+#: pyfemtet/opt/femopt.py:288
 msgid "Connecting cluster..."
 msgstr ""
 
-#: pyfemtet/opt/femopt.py:234
+#: pyfemtet/opt/femopt.py:299
 msgid "Launching threads..."
 msgstr ""
 
-#: pyfemtet/opt/femopt.py:248
+#: pyfemtet/opt/femopt.py:313
 msgid "Setting up..."
 msgstr ""
 
-#: pyfemtet/opt/femopt.py:277
+#: pyfemtet/opt/femopt.py:343
 msgid "Launching Monitor..."
 msgstr ""
 
-#: pyfemtet/opt/femopt.py:298
+#: pyfemtet/opt/femopt.py:364
 msgid "Setting up optimization problem..."
 msgstr ""
 
-#: pyfemtet/opt/femopt.py:347
+#: pyfemtet/opt/femopt.py:414
 #, python-brace-format
 msgid "Cannot save history. The most common reason is that the csv is opened by another program (such as Excel). Please free {path} or lost the optimization history."
 msgstr ""
 
-#: pyfemtet/opt/femopt.py:381
+#: pyfemtet/opt/femopt.py:448
 msgid "Getting monitor host information is failed within 30 seconds. It can not be able to terminate by requesting POST `<host>:<port>/interrupt` by an external process."
 msgstr ""
 
-#: pyfemtet/opt/femopt.py:434
+#: pyfemtet/opt/femopt.py:501
 #, python-brace-format
 msgid ""
 "After the program ends, you can check the optimization results using the result viewer.\n"
 "The result viewer can be launched by performing one of the following actions:\n"
-"- (Windows only) Launch the `pyfemtet-opt-result-viewer` shortcut on your desktop if exists.\n"
-"- (Windows only) Launch {path}.\n"
+"- {windows_only}Launch the `pyfemtet-opt-result-viewer` shortcut on your desktop if exists.\n"
+"- {windows_only}Launch {dir}.\n"
 "- Execute \"py -m pyfemtet.opt.visualization.history_viewer\" in the command line"
 msgstr ""
 
-#: pyfemtet/opt/femopt.py:459
+#: pyfemtet/opt/femopt.py:527
 msgid "Press Enter to quit..."
 msgstr ""
 
-#: pyfemtet/opt/femopt.py:466
+#: pyfemtet/opt/femopt.py:534
 msgid "All processes are terminated."
 msgstr ""
 
-#: pyfemtet/opt/history/_history.py:299
+#: pyfemtet/opt/history/_history.py:354
 #, python-brace-format
 msgid "The name `{name}` is duplicated. Please use another name."
 msgstr ""
 
-#: pyfemtet/opt/history/_history.py:1002
+#: pyfemtet/opt/history/_history.py:1173
 #, python-brace-format
 msgid "History csv file ({path}) is in use and cannot be written to. Please free this file before exiting the program, otherwise history data will be lost."
 msgstr ""
 
-#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:412
-#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:901
+#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:421
+#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:916
 #, python-brace-format
 msgid "{procedure_kind} procedure {procedure_name} is running..."
 msgstr ""
 
-#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:436
-#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:854
-#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:923
+#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:445
+#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:869
+#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:938
 #, python-brace-format
 msgid "Failed to run macro {procedure_name}. The original message is: {exception}"
 msgstr ""
 
-#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:448
+#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:457
 msgid "Launching and connecting to Microsoft Excel..."
 msgstr ""
 
-#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:456
+#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:465
 msgid "The connection to Excel is established."
 msgstr ""
 
-#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:510
+#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:519
 #, python-brace-format
-msgid "Femtet XLA file not found: {xla_file_path}"
+msgid "Femtet XLA file ({xla_file_path}) not found. Please run `Enable Macros` command."
 msgstr ""
 
-#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:756
+#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:771
 #, python-brace-format
 msgid "{xla_file_path} not found. Please check the \"Enable Macros\" command was executed."
 msgstr ""
 
-#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:814
+#: pyfemtet/opt/interface/_excel_interface/excel_interface.py:829
 msgid "The cell address specification by named range is failed. The process changes the specification method to table based."
 msgstr ""
 
-#: pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:235
+#: pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:140
+msgid "The argument `parametric_output_indexes_use_as_objective` is deprecated. Please use `FemtetInterface.use_parametric_output_as_objective()` instead."
+msgstr ""
+
+#: pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:238
 #, python-brace-format
 msgid "Closing Femtet (pid = {pid}) ..."
 msgstr ""
 
-#: pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:239
+#: pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:242
 msgid "Femtet is closed."
 msgstr ""
 
-#: pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:524
+#: pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:293
+msgid "The existing sweep table in the project will be removed."
+msgstr ""
+
+#: pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:403
+msgid "It was detected that the configuration of Femtet python macro constants has not been completed. The configuration was done automatically (python -m win32com.client.makepy FemtetMacro). Please restart the program. If the error persists, please run \"py -m win32com.client.makepy FemtetMacro\" or \"python -m win32com.client.makepy FemtetMacro\" on the command prompt."
+msgstr ""
+
+#: pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:577
 #, python-brace-format
 msgid "{name} does not finish in {warning_time_sec} seconds. If the optimization is hanging, the most reason is a dialog is opening in Femtet and it waits for your input. Please confirm there is no dialog in Femtet."
 msgstr ""
 
-#: pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:40
+#: pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:41
 msgid ""
 "`run_journal.exe` is not found. Please check:\n"
 "- NX is installed.\n"
@@ -781,181 +789,306 @@ msgid ""
 "- `<UGII_BASE_DIR>\\NXBIN\\run_journal.exe` exists.\n"
 msgstr ""
 
-#: pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:93
+#: pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:113
 msgid "Failed to update Solidworks model."
 msgstr ""
 
-#: pyfemtet/opt/interface/_solidworks_interface/solidworks_interface.py:67
+#: pyfemtet/opt/interface/_solidworks_interface/solidworks_interface.py:85
+msgid "Connecting to Solidworks..."
+msgstr ""
+
+#: pyfemtet/opt/interface/_solidworks_interface/solidworks_interface.py:92
 msgid "Failed to instantiate Solidworks. Please check installation and enabling macro."
 msgstr ""
 
-#: pyfemtet/opt/interface/_surrogate_model_interface/botorch_interface.py:255
+#: pyfemtet/opt/interface/_solidworks_interface/solidworks_interface.py:113
+msgid "Parallel processing is not supported when handling assembly parts with SolidworksInterface."
+msgstr ""
+
+#: pyfemtet/opt/interface/_solidworks_interface/solidworks_interface.py:173
+msgid "Failed to update the model on Solidworks."
+msgstr ""
+
+#: pyfemtet/opt/interface/_solidworks_interface/solidworks_interface.py:187
+#, python-brace-format
+msgid "Closing {model_name} ..."
+msgstr ""
+
+#: pyfemtet/opt/interface/_solidworks_interface/solidworks_interface.py:196
+#, python-brace-format
+msgid "Successfully closed {model_name}."
+msgstr ""
+
+#: pyfemtet/opt/interface/_surrogate_model_interface/base_surrogate_interface.py:83
+msgid "The length of _output_directions passed as a list must be same with that of the history's objective names."
+msgstr ""
+
+#: pyfemtet/opt/interface/_surrogate_model_interface/base_surrogate_interface.py:112
+#, python-brace-format
+msgid "The objective name {obj_name} is not in the train_history's objectives: {obj_names}"
+msgstr ""
+
+#: pyfemtet/opt/interface/_surrogate_model_interface/botorch_interface.py:288
 #, python-brace-format
 msgid "The surrogate model estimated that the probability of feasibility (PoF) is {pof}. This is under {thresh}. So this trial is processed as a constraint violation."
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:40
+#: pyfemtet/opt/optimizer/_base_optimizer.py:49
 msgid "----- Hidden constraint violation! -----"
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:41
+#: pyfemtet/opt/optimizer/_base_optimizer.py:50
 #, python-brace-format
 msgid "error: {err_msg}"
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:51
+#: pyfemtet/opt/optimizer/_base_optimizer.py:60
 #, python-brace-format
 msgid "There are duplicated name {name}. If there are duplicate names for parameters or objective functions, the later defined ones will overwrite the earlier ones. Please be careful to ensure that this overwriting is intentional."
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:136
+#: pyfemtet/opt/optimizer/_base_optimizer.py:105
 #, python-brace-format
 msgid "Supported variable types are Real or str, got {type}"
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:275
+#: pyfemtet/opt/optimizer/_base_optimizer.py:278
 msgid "`names` must be a string or an array of strings."
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:315
+#: pyfemtet/opt/optimizer/_base_optimizer.py:322
 msgid "One of `lower_bound` and `upper_bound` should be set."
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:399
+#: pyfemtet/opt/optimizer/_base_optimizer.py:874
 msgid "----- Hard constraint violation! -----"
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:400
+#: pyfemtet/opt/optimizer/_base_optimizer.py:875
 #, python-brace-format
 msgid "constraint: {name}"
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:401
+#: pyfemtet/opt/optimizer/_base_optimizer.py:876
 #, python-brace-format
 msgid "evaluated value: {value}"
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:403
+#: pyfemtet/opt/optimizer/_base_optimizer.py:878
 #, python-brace-format
 msgid "lower bound: {lb}"
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:406
+#: pyfemtet/opt/optimizer/_base_optimizer.py:881
 #, python-brace-format
 msgid "upper bound: {ub}"
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:493
+#: pyfemtet/opt/optimizer/_base_optimizer.py:995
 #, python-brace-format
 msgid "fidelity: ({name})"
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:494
+#: pyfemtet/opt/optimizer/_base_optimizer.py:997
 msgid "input variables:"
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:498
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1012
 msgid "updating variables..."
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:503
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1019
 msgid "evaluating constraint functions..."
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:514
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1032
 msgid "Hidden constraint violation during hard constraint function evaluation: "
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:528
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1045
 msgid "Hard constraint violation: "
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:534
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1052
 msgid "Solving FEM..."
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:549
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1067
 msgid "Hidden constraint violation in FEM update: "
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:555
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1075
 msgid "evaluating objective functions..."
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:569
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1091
 msgid "Hidden constraint violation during objective function evaluation: "
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:576
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1100
 msgid "evaluating remaining constraints..."
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:594
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1112
 msgid "Hidden constraint violation during soft constraint function evaluation: "
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:608
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1120
+msgid "evaluating other functions..."
+msgstr ""
+
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1136
+msgid "Hidden constraint violation during another output function evaluation: "
+msgstr ""
+
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1144
 msgid "output:"
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:728
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1302
 #, python-brace-format
 msgid "===== Exception raised in worker {worker_idx} ====="
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:736
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1310
 #, python-brace-format
 msgid "{name}: {exc_val}"
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:747
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1321
 #, python-brace-format
 msgid "worker `{worker}` started."
 msgstr ""
 
-#: pyfemtet/opt/optimizer/_base_optimizer.py:784
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1363
 #, python-brace-format
 msgid "worker `{worker}` successfully finished!"
 msgstr ""
 
-#: pyfemtet/opt/optimizer/scipy_optimizer/_scipy_optimizer.py:60
-msgid "`ScipyOptimizer` cannot use timeout."
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1380
+#, python-brace-format
+msgid "{succeeded_count} succeeded trials"
 msgstr ""
 
-#: pyfemtet/opt/optimizer/scipy_optimizer/_scipy_optimizer.py:72
-msgid "`ScipyOptimizer` cannot use n_trials."
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1467
+#, python-brace-format
+msgid ""
+"Enqueued parameter set contains more parameters than the optimization problem setup. The extra parameters will be ignored.\n"
+"Enqueued set: {enqueued_set}\n"
+"Setup set: {history_set}\n"
+"Parameters ignored: {over_set}"
 msgstr ""
 
-#: pyfemtet/opt/optimizer/scipy_optimizer/_scipy_optimizer.py:86
+#: pyfemtet/opt/optimizer/_base_optimizer.py:1491
+#, python-brace-format
+msgid ""
+"The enqueued parameter set lacks some parameters to be optimized.\n"
+"Enqueued set: {enqueued_set}\n"
+"Parameters to optimize: {history_set}\n"
+"Lacked set: {lacked_set}"
+msgstr ""
+
+#: pyfemtet/opt/optimizer/optuna_optimizer/_optuna_optimizer.py:197
+msgid "When using `OptunaOptimizer`, you must either specify `lower_bound` and `upper_bound`, or include `dynamic_bounds_fun` (Callable[[AbstractOptimizer], float]) in `properties`."
+msgstr ""
+
+#: pyfemtet/opt/optimizer/optuna_optimizer/_optuna_optimizer.py:205
+msgid "`dynamic_bounds_fun` is under development. The functionally can be changed without any announcement."
+msgstr ""
+
+#: pyfemtet/opt/optimizer/scipy_optimizer/_scipy_optimizer.py:116
+msgid "You cannot use `add_trial()` in `ScipyOptimizer`."
+msgstr ""
+
+#: pyfemtet/opt/optimizer/scipy_optimizer/_scipy_optimizer.py:129
 msgid "Scipy can optimize only numerical parameters."
 msgstr ""
 
-#: pyfemtet/opt/problem/problem.py:168
+#: pyfemtet/opt/problem/problem.py:177
 #, python-brace-format
 msgid "Index {i} is over n_return={n_return}."
 msgstr ""
 
-#: pyfemtet/opt/problem/problem.py:195
+#: pyfemtet/opt/problem/problem.py:204
 #, python-brace-format
 msgid "The number of return values of {fun_name} is {n_values}. This is inconsistent with the specified n_return; {n_return}."
 msgstr ""
 
-#: pyfemtet/opt/problem/variable_manager/_variable_manager.py:187
+#: pyfemtet/opt/problem/variable_manager/_variable_manager.py:207
+#: pyfemtet/opt/problem/variable_manager/_variable_manager.py:257
 #, python-brace-format
 msgid "Missing arguments! The arguments specified by `args`: {var_args} / The arguments specified by `kwargs`: {var_kwargs} / Required arguments: {msg}"
 msgstr ""
 
-#: pyfemtet/opt/problem/variable_manager/_variable_manager.py:201
+#: pyfemtet/opt/problem/variable_manager/_variable_manager.py:220
 msgid "Extra positional argument name cannot be duplicated with a variable name."
 msgstr ""
 
-#: pyfemtet/opt/problem/variable_manager/_variable_manager.py:218
+#: pyfemtet/opt/problem/variable_manager/_variable_manager.py:269
 msgid "Extra keyword argument name cannot be duplicated with a variable name."
 msgstr ""
 
-#: pyfemtet/opt/problem/variable_manager/_variable_manager.py:290
+#: pyfemtet/opt/problem/variable_manager/_variable_manager.py:352
 #, python-brace-format
 msgid "invalid format {format} is passed to VariableManager.get_variables(). Valid formats are one of (`raw`, `dict`, `values`)."
+msgstr ""
+
+#: pyfemtet/opt/visualization/history_viewer/_complex_components/detail_graphs.py:62
+msgid "Choices:"
+msgstr ""
+
+#: pyfemtet/opt/visualization/history_viewer/_complex_components/detail_graphs.py:298
+msgid "parallel coordinate plot"
+msgstr ""
+
+#: pyfemtet/opt/visualization/history_viewer/_complex_components/detail_graphs.py:300
+msgid ""
+"Visualize the relationships between input and output values in multiple dimensions. You can intuitively grasp trends and the magnitude of influence between variables for specific output values.\n"
+"\n"
+"**Tips: You can rearrange the axes and select ranges.**"
+msgstr ""
+
+#: pyfemtet/opt/visualization/history_viewer/_complex_components/detail_graphs.py:316
+msgid "contour plot"
+msgstr ""
+
+#: pyfemtet/opt/visualization/history_viewer/_complex_components/detail_graphs.py:319
+msgid ""
+"Visualize the correlation between input variables and changes in output using contour plots. You can identify combinations of variables that have a strong influence.\n"
+"\n"
+"**Tips: You can hide the scatter plot.**"
+msgstr ""
+
+#: pyfemtet/opt/visualization/history_viewer/_complex_components/detail_graphs.py:473
+msgid "importance plot"
+msgstr ""
+
+#: pyfemtet/opt/visualization/history_viewer/_complex_components/detail_graphs.py:475
+msgid "Evaluate the importance of each input variable for the output using fANOVA. You can quantitatively understand which inputs are important."
+msgstr ""
+
+#: pyfemtet/opt/visualization/history_viewer/_complex_components/detail_graphs.py:501
+msgid "optimization history plot"
+msgstr ""
+
+#: pyfemtet/opt/visualization/history_viewer/_complex_components/detail_graphs.py:503
+msgid "Display the history of outputs generated during optimization. You can check the progress of improvements and the variability of the search."
+msgstr ""
+
+#: pyfemtet/opt/visualization/history_viewer/_complex_components/detail_graphs.py:529
+msgid "slice plot"
+msgstr ""
+
+#: pyfemtet/opt/visualization/history_viewer/_complex_components/detail_graphs.py:532
+msgid "Displays the output response to a specific input. You can intuitively see the univariate effect, ignoring other variables."
+msgstr ""
+
+#: pyfemtet/opt/visualization/history_viewer/_complex_components/pm_graph.py:153
+msgid "Consider sub sampling when the model re-calc"
+msgstr ""
+
+#: pyfemtet/opt/visualization/history_viewer/_complex_components/pm_graph.py:431
+msgid "Cannot draw the graph because the bounds of selected parameter are not given."
 msgstr ""
 
 #: pyfemtet/opt/visualization/history_viewer/_process_monitor/_pages.py:68
@@ -963,25 +1096,46 @@ msgstr ""
 msgid "Keep {y_or_xy} ranges"
 msgstr ""
 
-#: pyfemtet/opt/visualization/history_viewer/result_viewer/_pages.py:220
+#: pyfemtet/opt/visualization/history_viewer/result_viewer/_pages.py:221
 #, python-brace-format
 msgid ".pdt file ({pdt_path}) is not found. Please check the .Results folder. Note that .pdt file save mode depends on the `save_pdt` argument of FemtetInterface in optimization script(default to `all`)."
 msgstr ""
 
-#: pyfemtet/opt/visualization/history_viewer/result_viewer/_pages.py:295
+#: pyfemtet/opt/visualization/history_viewer/result_viewer/_pages.py:281
+#, python-brace-format
+msgid "Model {model_name} is not in current project. Please check opened project. For example, if you have \"Analysis Results Only\" open, please switch the project to {prj_name}."
+msgstr ""
+
+#: pyfemtet/opt/visualization/history_viewer/result_viewer/_pages.py:310
 #, python-brace-format
 msgid "Unknown error has occurred in analysis model compatibility check. Exception message: {e}"
 msgstr ""
 
-#: pyfemtet/opt/visualization/plotter/pm_graph_creator.py:146
+#: pyfemtet/opt/visualization/plotter/main_figure_creator.py:22
+msgid "Not included in the evaluation."
+msgstr ""
+
+#: pyfemtet/opt/visualization/plotter/main_figure_creator.py:33
+msgid "optimal"
+msgstr ""
+
+#: pyfemtet/opt/visualization/plotter/main_figure_creator.py:38
+msgid "not optimal"
+msgstr ""
+
+#: pyfemtet/opt/visualization/plotter/main_figure_creator.py:56
+msgid "Feasibility"
+msgstr ""
+
+#: pyfemtet/opt/visualization/plotter/pm_graph_creator.py:147
 msgid "Upper of pred. std-dev"
 msgstr ""
 
-#: pyfemtet/opt/visualization/plotter/pm_graph_creator.py:150
+#: pyfemtet/opt/visualization/plotter/pm_graph_creator.py:151
 msgid "Lower of pred. std-dev"
 msgstr ""
 
-#: pyfemtet/opt/visualization/plotter/pm_graph_creator.py:183
+#: pyfemtet/opt/visualization/plotter/pm_graph_creator.py:184
 msgid "Std-dev of pred."
 msgstr ""
 

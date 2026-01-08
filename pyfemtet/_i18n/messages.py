@@ -221,7 +221,7 @@ class Message:
     LABEL_OF_AXIS1_SELECTION = _('Parameter')
     LABEL_OF_AXIS2_SELECTION = _('Parameter2')
     LABEL_OF_AXIS3_SELECTION = _('Objective')
-    ERR_NO_HISTORY_SELECTED = _('No history selected.')
+    INFO_NO_HISTORY_SELECTED = _('The history CSV has not been loaded yet. Please select a CSV file from the viewer screen first.')
     ERR_NO_FEM_RESULT = _('No FEM result (yet).')
     ERR_NO_PREDICTION_MODEL = _('Prediction model is not calculated yet.')
     ERR_CANNOT_SELECT_SAME_PARAMETER = _('Cannot select same parameter')

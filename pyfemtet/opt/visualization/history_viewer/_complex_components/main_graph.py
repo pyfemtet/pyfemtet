@@ -313,7 +313,7 @@ class MainGraph(AbstractPage):
 
             # load history
             if self.application.history is None:
-                logger.error(Msg.ERR_NO_HISTORY_SELECTED)
+                logger.info(Msg.INFO_NO_HISTORY_SELECTED)
                 raise PreventUpdate
 
             # assert 3 or more objectives
@@ -385,7 +385,7 @@ class MainGraph(AbstractPage):
 
             # load history
             if self.application.history is None:
-                logger.error(Msg.ERR_NO_HISTORY_SELECTED)
+                logger.info(Msg.INFO_NO_HISTORY_SELECTED)
                 raise PreventUpdate
             obj_names = self.application.history.obj_names
 

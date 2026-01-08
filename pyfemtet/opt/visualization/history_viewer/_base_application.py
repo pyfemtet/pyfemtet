@@ -34,7 +34,7 @@ __all__ = [
 
 
 logger = get_module_logger('opt.monitor', False)
-logger.setLevel(logging.ERROR)
+logger.setLevel(logging.INFO)
 
 dash_logger = get_dash_logger()
 dash_logger.setLevel(logging.ERROR)

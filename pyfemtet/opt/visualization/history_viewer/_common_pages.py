@@ -139,7 +139,7 @@ class OptunaVisualizerPage(AbstractPage):
         )
         def update_page(_):
             if self.application.history is None:
-                return Msg.ERR_NO_HISTORY_SELECTED
+                return Msg.INFO_NO_HISTORY_SELECTED
 
             if len(self.application.get_df()) == 0:
                 return Msg.ERR_NO_FEM_RESULT
