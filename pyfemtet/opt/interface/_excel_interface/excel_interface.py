@@ -47,6 +47,13 @@ class WorkSheetNotFoundError(Exception):
     pass
 
 
+def open_book_readonly(excel: CDispatch, path: str) -> CDispatch:
+    # noinspection PyPep8Naming
+    xlUpdateLinksUserSetting = 1
+    wb = excel.Workbooks.Open(path, UpdateLinks=xlUpdateLinksUserSetting, ReadOnly=True)
+    return wb
+
+
 class ExcelInterface(COMInterface):
     """Excel を計算コアとして利用するためのクラス。
 
@@ -471,17 +478,17 @@ class ExcelInterface(COMInterface):
         sleep(0.5)
 
         # open
-        self.excel.Workbooks.Open(self.input_xlsm_path)
+        open_book_readonly(self.excel, self.input_xlsm_path)
         sleep(0.1)
-        self.excel.Workbooks.Open(self.output_xlsm_path)
+        open_book_readonly(self.excel, self.output_xlsm_path)
         sleep(0.1)
-        self.excel.Workbooks.Open(self.constraint_xlsm_path)
+        open_book_readonly(self.excel, self.constraint_xlsm_path)
         sleep(0.1)
-        self.excel.Workbooks.Open(self.procedure_xlsm_path)
+        open_book_readonly(self.excel, self.procedure_xlsm_path)
         sleep(0.1)
-        self.excel.Workbooks.Open(self.setup_xlsm_path)
+        open_book_readonly(self.excel, self.setup_xlsm_path)
         sleep(0.1)
-        self.excel.Workbooks.Open(self.teardown_xlsm_path)
+        open_book_readonly(self.excel, self.teardown_xlsm_path)
         sleep(0.1)
 
         # book に参照設定を追加する
@@ -513,7 +520,7 @@ class ExcelInterface(COMInterface):
             )
 
         # self.excel.Workbooks.Add(xla_file_path)
-        self.excel.Workbooks.Open(xla_file_path, ReadOnly=True)
+        open_book_readonly(self.excel, xla_file_path)
 
     @staticmethod
     def add_femtet_macro_reference(wb):
