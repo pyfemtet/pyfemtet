@@ -453,6 +453,10 @@ class FemtetInterface(COMInterface):
             if not result:
                 self.Femtet.ShowLastError()
 
+        # Femtet で開いただけで互換性のない変更が加えられる場合に
+        # 未保存の変更状態になるのを防ぐため上書き保存を行う
+        self.Femtet.SaveProject(self.femprj_path, True)
+
     def _connect_and_open_femtet(self):
         """Connects to a Femtet process and open the femprj.
 
