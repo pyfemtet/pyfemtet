@@ -123,6 +123,8 @@ def test_run_multiple_excel():
         )
 
 
+@pytest.mark.excel
+@pytest.mark.femtet
 def test_run_multiple_fem_excel():
     fem1 = ExcelInterface(
         input_xlsm_path=get(__file__, 'test_excel_interface.xlsm'),
