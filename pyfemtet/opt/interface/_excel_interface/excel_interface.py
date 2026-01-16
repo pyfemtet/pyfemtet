@@ -28,6 +28,7 @@ from pyfemtet._i18n import _
 from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.problem.problem import *
 from pyfemtet.opt.interface._base_interface import COMInterface
+from pyfemtet.opt.interface._reopen_decorator import with_reopen
 
 from pyfemtet.logger import get_module_logger
 from pyfemtet._util.helper import float_

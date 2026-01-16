@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 from time import sleep
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeAlias
 import os
 
-from win32com.client import Dispatch
+from win32com.client import Dispatch, CDispatch
 from pythoncom import com_error, CoInitialize
 
 from pyfemtet._util.dask_util import *
 from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.interface._base_interface import COMInterface
+from pyfemtet.opt.interface._reopen_decorator import with_reopen
 from pyfemtet._i18n import _
 from pyfemtet.opt.problem.problem import *
 from pyfemtet.logger import get_module_logger
@@ -32,6 +33,9 @@ swSaveAsOptions_Silent = 1  # https://help.solidworks.com/2021/english/api/swcon
 swSaveWithReferencesOptions_None = 0  # https://help-solidworks-com.translate.goog/2023/english/api/swconst/SolidWorks.Interop.swconst~SolidWorks.Interop.swconst.swSaveWithReferencesOptions_e.html?_x_tr_sl=auto&_x_tr_tl=ja&_x_tr_hl=ja&_x_tr_pto=wapp
 swDocPART = 1  # https://help.solidworks.com/2023/english/api/swconst/SOLIDWORKS.Interop.swconst~SOLIDWORKS.Interop.swconst.swDocumentTypes_e.html
 swDocASSEMBLY = 2
+
+# COM 型エイリアス
+ModelDoc: TypeAlias = CDispatch
 
 
 class FileNotOpenedError(Exception):
@@ -130,18 +134,46 @@ class SolidworksInterface(COMInterface):
             self.connect_sw()
 
             # open it
-            if is_assembly(self.sldprt_path):
-                self.swApp.OpenDoc(self.sldprt_path, swDocASSEMBLY)
-            else:
-                self.swApp.OpenDoc(self.sldprt_path, swDocPART)
+            self._open_prt_or_asm(self.sldprt_path)
+
+    def _open_prt_or_asm(self, path):
+        if is_assembly(path):
+            self.swApp.OpenDoc(path, swDocASSEMBLY)
+        else:
+            self.swApp.OpenDoc(path, swDocPART)
+
+    def reopen(self):
+        # アクティブなモデルが目的のモデルであれば何もせず終了
+        swModel: ModelDoc | None = self.swApp.ActiveDoc
+        if swModel is not None:
+            path1 = os.path.normcase(os.path.abspath(swModel.GetPathName))
+            path2 = os.path.normcase(os.path.abspath(self.sldprt_path))
+            if path1 == path2:
+                return
+
+        # 開いているモデルの中に目的のモデルがなければ開いて終了
+        for swModel in self.swApp.GetDocuments:
+            path1 = os.path.normcase(os.path.abspath(swModel.GetPathName))
+            path2 = os.path.normcase(os.path.abspath(self.sldprt_path))
+            if path1 == path2:
+                break
+        else:
+            # for を抜けた場合、またはそもそも GetDocuments が空の場合
+            self._open_prt_or_asm(self.sldprt_path)
+
+        # 開いているモデルの中には目的のモデルがあるはずなので
+        # アクティブにする
+        self.swApp.ActivateDoc(os.path.basename(self.sldprt_path))
 
     @property
     def swModel(self):
         return _get_model_by_basename(self.swApp, os.path.basename(self.sldprt_path))
 
+    @with_reopen
     def update(self) -> None:
         raise NotImplementedError
 
+    @with_reopen
     def update_parameter(self, x: TrialInput) -> None:
 
         COMInterface.update_parameter(self, x)
@@ -159,6 +191,7 @@ class SolidworksInterface(COMInterface):
             }
             mgr.update_global_variables_recourse(swModel, sw_variables)
 
+    @with_reopen
     def update_model(self):
         """Update .sldprt"""
 

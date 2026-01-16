@@ -33,6 +33,7 @@ from pyfemtet._util.femtet_access_inspection import *
 
 from pyfemtet.dispatch_extensions import *
 from pyfemtet.opt.interface._base_interface import AbstractFEMInterface, COMInterface
+from pyfemtet.opt.interface._reopen_decorator import with_reopen
 from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.problem.problem import *
 from pyfemtet.opt.history import get_trial_name
@@ -312,7 +313,7 @@ class FemtetInterface(COMInterface):
 
         self.parametric_output_indexes_use_as_objective.update(index)
 
-    @AbstractFEMInterface._with_reopen
+    @with_reopen
     def load_objectives(self, opt: AbstractOptimizer):
         if len(self.parametric_output_indexes_use_as_objective) > 0:
             indexes = list(self.parametric_output_indexes_use_as_objective.keys())
@@ -439,16 +440,12 @@ class FemtetInterface(COMInterface):
         self.model_name = model_name
         # 開く
         if self.model_name is None:
-            result = self.Femtet.LoadProject(self.femprj_path, True)
+            result = self.Femtet.LoadProject(self.femprj_path, False)
             if not result:
                 self.Femtet.ShowLastError()
         else:
-            result = self.Femtet.LoadProject(self.femprj_path, True)
-            if not result:
-                self.Femtet.ShowLastError()
-
             result = self.Femtet.LoadProjectAndAnalysisModel(
-                self.femprj_path, self.model_name, True
+                self.femprj_path, self.model_name, False  # bForce = True だと未保存のほかのファイルを閉じようとしてダイアログが開く
             )
             if not result:
                 self.Femtet.ShowLastError()
@@ -829,7 +826,7 @@ class FemtetInterface(COMInterface):
 
     # ===== model check and solve =====
 
-    @AbstractFEMInterface._with_reopen
+    @with_reopen
     def _check_param_and_raise(self, param_name) -> None:
         """Check param_name is set in femprj file or not.
 
@@ -861,7 +858,7 @@ class FemtetInterface(COMInterface):
         else:
             return None
 
-    @AbstractFEMInterface._with_reopen
+    @with_reopen
     def update_parameter(self, x: TrialInput, with_warning=False) -> None | list[str]:
         """Update parameter of femprj."""
         COMInterface.update_parameter(self, x)
@@ -951,7 +948,7 @@ class FemtetInterface(COMInterface):
         else:
             return None
 
-    @AbstractFEMInterface._with_reopen
+    @with_reopen
     def update_model(self) -> None:
         """Updates the analysis model only."""
 
@@ -973,7 +970,7 @@ class FemtetInterface(COMInterface):
             is_Gaudi_method=True,
         )
 
-    @AbstractFEMInterface._with_reopen
+    @with_reopen
     def solve(self) -> None:
         """Execute FEM analysis."""
 
@@ -1040,7 +1037,7 @@ class FemtetInterface(COMInterface):
             args=(self.open_result_with_gui,),
         )
 
-    @AbstractFEMInterface._with_reopen
+    @with_reopen
     def preprocess(self, Femtet):
         """A method called just before :func:`solve`.
 
@@ -1052,7 +1049,7 @@ class FemtetInterface(COMInterface):
         """
         pass
 
-    @AbstractFEMInterface._with_reopen
+    @with_reopen
     def postprocess(self, Femtet):
         """A method called just after :func:`solve`.
 
@@ -1064,7 +1061,7 @@ class FemtetInterface(COMInterface):
         """
         pass
 
-    @AbstractFEMInterface._with_reopen
+    @with_reopen
     def update(self) -> None:
         """See :func:`FEMInterface.update`"""
         self.update_model()
@@ -1074,7 +1071,7 @@ class FemtetInterface(COMInterface):
 
     # ===== postprocess after recording =====
 
-    @AbstractFEMInterface._with_reopen
+    @with_reopen
     def _create_postprocess_args(self):
         try:
             file_content = self._create_result_file_content()
@@ -1144,7 +1141,7 @@ class FemtetInterface(COMInterface):
                     if os.path.isfile(pdt_path_to_remove):
                         os.remove(pdt_path_to_remove)
 
-    @AbstractFEMInterface._with_reopen
+    @with_reopen
     def _create_result_file_content(self):
         """Called after solve"""
         if self.save_pdt.lower() in ['all', 'optimal']:
@@ -1169,7 +1166,7 @@ class FemtetInterface(COMInterface):
         else:
             return None
 
-    @AbstractFEMInterface._with_reopen
+    @with_reopen
     def _create_jpg_content(self):
         result_dir = self.femprj_path.replace(".femprj", ".Results")
         jpg_path = os.path.join(result_dir, self.model_name + ".jpg")
