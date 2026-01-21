@@ -10,7 +10,7 @@ from pyfemtet.opt.interface._excel_interface import ExcelInterface
 from pyfemtet.opt.interface._femtet_interface import FemtetInterface
 
 if TYPE_CHECKING:
-    from pyfemtet.opt.optimizer import AbstractOptimizer
+    from pyfemtet.opt.optimizer import AbstractOptimizer, OptimizationDataPerFEM
 
 
 def _get_name(FEMClass: type):
@@ -68,12 +68,12 @@ def _class_factory(FEMClass: type[AbstractFEMInterface]) -> type[AbstractFEMInte
             ExcelInterface._setup_after_parallel(self, opt)
             FEMClass._setup_after_parallel(self, opt)
 
-        def load_variable(self, opt: AbstractOptimizer, raise_if_no_keyword=True) -> None:
+        def load_variable(self, opt: OptimizationDataPerFEM, raise_if_no_keyword=True) -> None:
             assert self._excel_initialized, '最初に init_excel() を呼び出してください。'
             ExcelInterface.load_variables(self, opt, raise_if_no_keyword)
             FEMClass.load_variables(self, opt)
 
-        def load_objectives(self, opt: AbstractOptimizer, raise_if_no_keyword=False) -> None:
+        def load_objectives(self, opt: OptimizationDataPerFEM, raise_if_no_keyword=False) -> None:
             assert self._excel_initialized, '最初に init_excel() を呼び出してください。'
             ExcelInterface.load_objectives(self, opt, raise_if_no_keyword)
 
@@ -109,7 +109,7 @@ def _class_factory(FEMClass: type[AbstractFEMInterface]) -> type[AbstractFEMInte
             else:
                 FEMClass.load_objectives(self, opt)
 
-        def load_constraints(self, opt: AbstractOptimizer, raise_if_no_keyword=False) -> None:
+        def load_constraints(self, opt: OptimizationDataPerFEM, raise_if_no_keyword=False) -> None:
             assert self._excel_initialized, '最初に init_excel() を呼び出してください。'
             ExcelInterface.load_constraints(self, opt, raise_if_no_keyword)
             FEMClass.load_constraints(self, opt)

@@ -539,7 +539,7 @@ class FEMListForGlobal(FEMListInterface):
     def update_parameter(self, x: TrialInput) -> None:
         pass
 
-    def update(self):
+    def update(self) -> None:
         pass
 
     def _check_param_and_raise(self, prm_name) -> None:

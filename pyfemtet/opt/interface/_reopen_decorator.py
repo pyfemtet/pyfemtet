@@ -24,7 +24,7 @@ class _WithReopen(Generic[P, R]):
 
         # この時点ではデコレート対象メソッドの所属クラスは未構築なので
         # self.owner は None としておき、後で設定する。
-        self.owner: Optional[type] = None
+        self.owner: type | None = None
 
     def __set_name__(self, owner: type, name: str) -> None:
         # このインスタンスはメソッドをデコレートするので

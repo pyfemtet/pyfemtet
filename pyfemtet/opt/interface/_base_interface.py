@@ -18,6 +18,7 @@ except ModuleNotFoundError:
     def CoUninitialize(): ...
     Dispatch = type('NoDispatch', (object,), {})
     Constants = type('NoConstants', (object,), {})
+    # noinspection PyFinal
     constants = Constants()
 
 from pyfemtet._util.dask_util import *
@@ -84,7 +85,7 @@ class AbstractFEMInterface:
     # ===== Function =====
 
     @property
-    def object_pass_to_fun(self):
+    def object_pass_to_fun(self) -> Any:
         """The object pass to the first argument of user-defined objective functions.
 
         Returns:
@@ -234,7 +235,7 @@ class AbstractFEMInterface:
             trial_name: str,
             df: pd.DataFrame,
             **kwargs
-    ) -> ...:  # _postprocess_after_recording
+    ) -> None:  # _postprocess_after_recording
         pass
 
     # ===== others =====

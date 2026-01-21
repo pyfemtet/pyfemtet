@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, Sequence, Callable
 
 from pyfemtet.opt.history import *
 
@@ -141,7 +141,7 @@ class AbstractSurrogateModelInterfaceBase(AbstractFEMInterface):
         opt.objectives.update(ctx.objectives)
         opt.objectives.update(global_data.objectives)
 
-    def _check_using_fem(self, fun: callable) -> bool:
+    def _check_using_fem(self, fun: Callable) -> bool:
         return False
 
     def _check_param_and_raise(self, prm_name) -> None:

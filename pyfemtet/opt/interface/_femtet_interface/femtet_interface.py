@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, Callable
 
 import os
 import sys
@@ -14,6 +14,7 @@ from packaging.version import Version
 from pywintypes import com_error, error
 # noinspection PyUnresolvedReferences
 from pythoncom import CoInitialize, CoUninitialize
+# noinspection PyUnusedImports
 from win32com.client import constants, Dispatch
 import win32con
 import win32gui
@@ -32,7 +33,7 @@ from pyfemtet._util.femtet_autosave import *
 from pyfemtet._util.femtet_access_inspection import *
 
 from pyfemtet.dispatch_extensions import *
-from pyfemtet.opt.interface._base_interface import AbstractFEMInterface, COMInterface
+from pyfemtet.opt.interface._base_interface import COMInterface
 from pyfemtet.opt.interface._reopen_decorator import with_reopen
 from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.problem.problem import *
@@ -41,7 +42,7 @@ from pyfemtet.opt.history import get_trial_name
 from ._femtet_parametric import *
 
 if TYPE_CHECKING:
-    from pyfemtet.opt.optimizer import AbstractOptimizer
+    from pyfemtet.opt.optimizer._base_optimizer import AbstractOptimizer, OptimizationDataPerFEM
 
 logger = get_module_logger('opt.interface', False)
 
@@ -314,7 +315,7 @@ class FemtetInterface(COMInterface):
         self.parametric_output_indexes_use_as_objective.update(index)
 
     @with_reopen
-    def load_objectives(self, opt: AbstractOptimizer):
+    def load_objectives(self, opt: OptimizationDataPerFEM):
         if len(self.parametric_output_indexes_use_as_objective) > 0:
             indexes = list(self.parametric_output_indexes_use_as_objective.keys())
             directions = list(self.parametric_output_indexes_use_as_objective.values())
@@ -322,7 +323,7 @@ class FemtetInterface(COMInterface):
                 opt, self.Femtet, indexes, directions
             )
 
-    def _check_using_fem(self, fun: callable):
+    def _check_using_fem(self, fun: Callable):
         return _is_access_femtet(fun)
 
     # ===== connect_femtet =====
@@ -336,7 +337,7 @@ class FemtetInterface(COMInterface):
 
         self.connected_method = "new"
 
-    def _connect_existing_femtet(self, pid: int or None = None):
+    def _connect_existing_femtet(self, pid: int | None = None):
         logger.info("└ Try to connect existing Femtet process.")
         # 既存の Femtet を探して Dispatch する。
         if pid is None:
@@ -345,7 +346,7 @@ class FemtetInterface(COMInterface):
             self.Femtet, self.femtet_pid = dispatch_specific_femtet(pid, timeout=self._femtet_connection_timeout)
         self.connected_method = "existing"
 
-    def connect_femtet(self, connect_method: str = "auto", pid: int or None = None):
+    def connect_femtet(self, connect_method: str = "auto", pid: int | None = None):
         """Connects to a Femtet process.
 
         Args:
@@ -432,7 +433,7 @@ class FemtetInterface(COMInterface):
                 jp_message='Femtet への接続に失敗しました。',
             ))
 
-    def open(self, femprj_path: str, model_name: str or None = None) -> None:
+    def open(self, femprj_path: str, model_name: str | None = None) -> None:
         """Open specific analysis model with connected Femtet."""
 
         # 引数の処理
@@ -526,7 +527,7 @@ class FemtetInterface(COMInterface):
         return True
 
     # noinspection PyMethodMayBeStatic
-    def _construct_femtet_api(self, string: str | callable):  # static にしてはいけない
+    def _construct_femtet_api(self, string: str | Callable):  # static にしてはいけない
         if isinstance(string, str):
             if string.startswith("self."):
                 return eval(string)
@@ -1111,7 +1112,7 @@ class FemtetInterface(COMInterface):
         model_name: str,
         pdt_file_content=None,
         jpg_file_content=None,
-    ):
+    ) -> None:
         # FIXME: サブサンプリングの場合の処理
 
         # none なら何もしない

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable, Any
+from typing import TYPE_CHECKING, Callable, Any, Iterator
 
 from ._base_interface import AbstractFEMInterface
 from pyfemtet.opt.problem.problem import TrialInput
@@ -19,19 +19,19 @@ class FEMListInterface(AbstractFEMInterface):
     def __init__(self):
         self._fems: list[AbstractFEMInterface] = []
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[AbstractFEMInterface]:
         return iter(self._fems)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._fems)
 
     def __getitem__(self, index: int) -> AbstractFEMInterface:
         return self._fems[index]
 
-    def append(self, fem: AbstractFEMInterface):
+    def append(self, fem: AbstractFEMInterface) -> None:
         self._fems.append(fem)
 
-    def remove(self, fem: AbstractFEMInterface):
+    def remove(self, fem: AbstractFEMInterface) -> None:
         self._fems.remove(fem)
 
     def pop(self, index: int) -> AbstractFEMInterface:
@@ -41,7 +41,7 @@ class FEMListInterface(AbstractFEMInterface):
         for fem in self._fems:
             fem.update_parameter(x)
 
-    def update(self):
+    def update(self) -> None:
         for fem in self._fems:
             fem.update()
 
@@ -62,7 +62,7 @@ class FEMListInterface(AbstractFEMInterface):
             fem.trial_postprocess_per_fidelity()
 
     @property
-    def object_pass_to_fun(self):
+    def object_pass_to_fun(self) -> list[Any]:
         return [fem.object_pass_to_fun for fem in self._fems]
 
     def reopen(self):
@@ -103,7 +103,6 @@ class FEMListInterface(AbstractFEMInterface):
             fem.contact_to_optimizer(opt, global_data, ctx)
 
     def close(self, *args, **kwargs):
-        # TODO: 引数の取り扱い
         for fem in self._fems:
             fem.close()
 
@@ -125,7 +124,7 @@ class FEMListInterface(AbstractFEMInterface):
     @staticmethod
     def _postprocess_after_recording(
         dask_scheduler, trial_name: str, df: Any, **kwargs
-    ) -> ...:
+    ) -> None:
         for kwargs_per_fem in kwargs.values():
             postprocess = kwargs_per_fem.pop('__postprocess_fun__', None)
             if postprocess is None:

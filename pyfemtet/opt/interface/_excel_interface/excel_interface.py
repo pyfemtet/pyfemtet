@@ -28,13 +28,12 @@ from pyfemtet._i18n import _
 from pyfemtet.opt.exceptions import *
 from pyfemtet.opt.problem.problem import *
 from pyfemtet.opt.interface._base_interface import COMInterface
-from pyfemtet.opt.interface._reopen_decorator import with_reopen
 
 from pyfemtet.logger import get_module_logger
 from pyfemtet._util.helper import float_
 
 if TYPE_CHECKING:
-    from pyfemtet.opt.optimizer import AbstractOptimizer
+    from pyfemtet.opt.optimizer import AbstractOptimizer, OptimizationDataPerFEM
     from pyfemtet.opt.problem.problem import Objective, Constraint
 
 logger = get_module_logger('opt.interface')
@@ -227,10 +226,10 @@ class ExcelInterface(COMInterface):
 
     setup_xlsm_path: str
     setup_procedure_name: str
-    setup_procedure_args: list or tuple
+    setup_procedure_args: list | tuple
     teardown_xlsm_path: str
     teardown_procedure_name: str
-    teardown_procedure_args: list or tuple
+    teardown_procedure_args: list | tuple
 
     use_named_range: bool  # input を定義したシートにおいて input の値を名前付き範囲で指定するかどうか。
     force_override_when_load: bool  # すでに指定されている parameter 等を excel の load 時に上書きするかどうか。
@@ -239,24 +238,24 @@ class ExcelInterface(COMInterface):
 
     def __init__(
             self,
-            input_xlsm_path: str or Path,
+            input_xlsm_path: str | Path,
             input_sheet_name: str,
-            output_xlsm_path: str or Path = None,
+            output_xlsm_path: str | Path = None,
             output_sheet_name: str = None,
-            constraint_xlsm_path: str or Path = None,
+            constraint_xlsm_path: str | Path = None,
             constraint_sheet_name: str = None,
-            procedure_xlsm_path: str or Path = None,
+            procedure_xlsm_path: str | Path = None,
             procedure_name: str = None,
-            procedure_args: list or tuple = None,
+            procedure_args: list | tuple = None,
             connect_method: str = 'new',  # or 'auto'
-            procedure_timeout: float or None = None,
-            setup_xlsm_path: str or Path = None,
+            procedure_timeout: float | None = None,
+            setup_xlsm_path: str | Path = None,
             setup_procedure_name: str = None,
-            setup_procedure_args: list or tuple = None,
-            teardown_xlsm_path: str or Path = None,
+            setup_procedure_args: list | tuple = None,
+            teardown_xlsm_path: str | Path = None,
             teardown_procedure_name: str = None,
-            teardown_procedure_args: list or tuple = None,
-            related_file_paths: list[str or Path] = None,
+            teardown_procedure_args: list | tuple = None,
+            related_file_paths: list[str | Path] = None,
             visible: bool = False,
             display_alerts: bool = False,
             terminate_excel_when_quit: bool = None,
@@ -552,7 +551,7 @@ class ExcelInterface(COMInterface):
                     wb.VBProject.References.Remove(ref)
 
     # ===== load =====
-    def load_variables(self, opt: AbstractOptimizer, raise_if_no_keyword=True) -> None:
+    def load_variables(self, opt: OptimizationDataPerFEM, raise_if_no_keyword=True) -> None:
 
         df = ParseAsParameter.parse(
             self.input_xlsm_path,
@@ -633,7 +632,7 @@ class ExcelInterface(COMInterface):
             else:
                 raise NotImplementedError
 
-    def load_objectives(self, opt: AbstractOptimizer, raise_if_no_keyword=True):
+    def load_objectives(self, opt: OptimizationDataPerFEM, raise_if_no_keyword=True):
 
         df = ParseAsObjective.parse(
             self.output_xlsm_path,
@@ -677,7 +676,7 @@ class ExcelInterface(COMInterface):
                     supress_duplicated_name_check=True,
                 )
 
-    def load_constraints(self, opt: AbstractOptimizer, raise_if_no_keyword=False):
+    def load_constraints(self, opt: OptimizationDataPerFEM, raise_if_no_keyword=False):
 
         df = ParseAsConstraint.parse(
             self.constraint_xlsm_path,
