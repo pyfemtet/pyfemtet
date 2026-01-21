@@ -466,7 +466,7 @@ class ExcelInterface(COMInterface):
             jp_message='Excel への接続が確立されました。',
         ))
         # FemtetRef.xla を開く
-        self.open_femtet_ref_xla()
+        self.open_femtet_addins()
         sleep(0.5)
 
         # 起動した excel の pid を記憶する
@@ -497,58 +497,93 @@ class ExcelInterface(COMInterface):
         sleep(0.1)
 
         # book に参照設定を追加する
+        self.add_femtet_addin_reference(self.wb_input)
+        self.add_femtet_addin_reference(self.wb_output)
+        self.add_femtet_addin_reference(self.wb_setup)
+        self.add_femtet_addin_reference(self.wb_teardown)
+        self.add_femtet_addin_reference(self.wb_constraint)
         self.add_femtet_macro_reference(self.wb_input)
         self.add_femtet_macro_reference(self.wb_output)
         self.add_femtet_macro_reference(self.wb_setup)
         self.add_femtet_macro_reference(self.wb_teardown)
         self.add_femtet_macro_reference(self.wb_constraint)
 
-    def open_femtet_ref_xla(self):
+    @staticmethod
+    def get_femtet_ref_path() -> str | None:
+        # 64 bit
+        path = r'C:\Program Files\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla'
+        if os.path.exists(path):
+            return path
 
-        # get 64 bit
-        xla_file_path = r'C:\Program Files\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla'
+        # if not exist, try 32 bit
+        path = r'C:\Program Files (x86)\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla'
+        if os.path.exists(path):
+            return path
 
-        # if not exist, get 32bit
-        if not os.path.exists(xla_file_path):
-            xla_file_path = r'C:\Program Files (x86)\Microsoft Office\root\Office16\XLSTART\FemtetRef.xla'
-
-        # certify
-        if not os.path.exists(xla_file_path):
-            raise FileNotFoundError(
-                _(
-                    en_message='Femtet XLA file ({xla_file_path}) not found. '
-                               'Please run `Enable Macros` command.',
-                    jp_message='Femtet XLA ファイル ({xla_file_path}) が見つかりません。'
-                               '「マクロ機能の有効化」を実行してください。',
-                    xla_file_path=xla_file_path
-                )
-            )
-
-        # self.excel.Workbooks.Add(xla_file_path)
-        open_book_readonly(self.excel, xla_file_path)
+        # if not exist, return None
+        return None
 
     @staticmethod
-    def add_femtet_macro_reference(wb):
+    def get_femtet_addin_path() -> str | None:
+        # 64 bit
+        path = r'C:\Program Files\Microsoft Office\root\Office16\XLSTART\FemtetAddin.xlam'
+        if os.path.exists(path):
+            return path
 
-        # search
-        ref_file_2 = os.path.abspath(util._get_femtetmacro_dllpath())
-        contain_2 = False
-        for ref in wb.VBProject.References:
-            if ref.Description is not None:
-                if ref.Description == 'FemtetMacro':  # FemtetMacro
-                    contain_2 = True
-                    break
-        # add
-        if not contain_2:
-            wb.VBProject.References.AddFromFile(ref_file_2)
+        # if not exist, try 32 bit
+        path = r'C:\Program Files (x86)\Microsoft Office\root\Office16\XLSTART\FemtetAddin.xlam'
+        if os.path.exists(path):
+            return path
+
+        # if not exist, return None
+        return None
+
+    def open_femtet_addins(self):
+
+        ref_path = self.get_femtet_ref_path()
+        addin_path = self.get_femtet_addin_path()
+
+        if ref_path is None and addin_path is None:
+            raise RuntimeError(_(
+                jp_message="Femtet のアドインファイルが見つかりません。"
+                           "Femtet がインストールされており、"
+                           "「マクロ機能の有効化」が実行されていることを確認してください。",
+                en_message="Femtet add-in files are not found. "
+                            "Please ensure that Femtet is installed and "
+                            "`Enable Macros` command has been executed."
+            ))
+
+        if ref_path is not None:
+            open_book_readonly(self.excel, ref_path)
+        if addin_path is not None:
+            open_book_readonly(self.excel, addin_path)
 
     @staticmethod
-    def remove_femtet_ref_xla(wb):
-        # search
+    def remove_femtet_macro_reference(wb):
         for ref in wb.VBProject.References:
             if ref.Description is not None:
                 if ref.Description == 'FemtetMacro':  # FemtetMacro
                     wb.VBProject.References.Remove(ref)
+                    break
+
+    def add_femtet_macro_reference(self, wb):
+        self.remove_femtet_macro_reference(wb)
+        femtet_macro_dll_path = os.path.abspath(util._get_femtetmacro_dllpath())
+        wb.VBProject.References.AddFromFile(femtet_macro_dll_path)
+
+    @staticmethod
+    def remove_femtet_addin_reference(wb):
+        for ref in wb.VBProject.References:
+            if (ref.Name == "FemtetReference"
+            or ref.Name == "FemtetAddin.xlam"):
+                wb.VBProject.References.Remove(ref)
+                break
+
+    def add_femtet_addin_reference(self, wb):
+        self.remove_femtet_addin_reference(wb)
+        femtet_addin_path = self.get_femtet_addin_path()
+        if femtet_addin_path is not None:
+            wb.VBProject.References.AddFromFile(femtet_addin_path)
 
     # ===== load =====
     def load_variables(self, opt: OptimizationDataPerFEM, raise_if_no_keyword=True) -> None:
