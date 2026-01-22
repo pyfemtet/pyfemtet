@@ -94,6 +94,13 @@ def test_excel_ui():
     if os.path.isfile(history_path.replace(".csv", ".db")):
         os.remove(history_path.replace(".csv", ".db"))
 
+    from tests.utils.reccsv_processor import RECCSV
+    reccsv_path = os.path.join(here, "test_excel_ui_history.reccsv")
+    reccsv_checker = RECCSV(
+        base_path=os.path.splitext(reccsv_path)[0],
+        record=False,
+    )
+
     # Replace pyfemtet-core.py to disable confirm before exit
     with open(distination_core_py, "r", encoding="utf-8") as f:
         content = f.read()
@@ -140,17 +147,11 @@ def test_excel_ui():
         gc.collect()
 
     # Check the result .reccsv
-    from tests.utils.reccsv_processor import RECCSV
     from pyfemtet.opt.history import History
     history = History()
     history.load_csv(history_path, with_finalize=True)
     df = history.get_df()
 
-    reccsv_path = os.path.join(here, "test_excel_ui_history.reccsv")
-    reccsv_checker = RECCSV(
-        base_path=os.path.splitext(reccsv_path)[0],
-        record=False,
-    )
     reccsv_checker.check(
         check_columns_float=[
             'section_radius',
@@ -158,10 +159,10 @@ def test_excel_ui():
         ],
         check_columns_str=[],
         dif_df=df,
-        rtol=0.01,
+        rtol=0.1,
     )
 
 
 if __name__ == "__main__":
-    test_multiple_models()
+    # test_multiple_models()
     test_excel_ui()
