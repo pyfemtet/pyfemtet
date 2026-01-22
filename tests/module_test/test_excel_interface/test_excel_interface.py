@@ -199,4 +199,4 @@ def test_run_multiple_fem_excel():
 if __name__ == '__main__':
     # test_load_single_excel()
     test_run_multiple_excel()
-    # test_run_multiple_fem_excel()
+    test_run_multiple_fem_excel()
