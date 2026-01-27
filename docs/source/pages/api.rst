@@ -27,6 +27,7 @@ FEM Interfaces
    pyfemtet.opt.interface.FemtetInterface
    pyfemtet.opt.interface.FemtetWithSolidworksInterface
    pyfemtet.opt.interface.FemtetWithNXInterface
+   pyfemtet.opt.interface.ExcelInterface
 
 
 Optimizers

@@ -1,7 +1,7 @@
-"""拘束付き最適化を実装するサンプル。
+"""A sample to implement constrained optimization.
 
-このセクションでは、拘束の種類と、拘束を必要とするモデルで
-最適化を実行する手順について説明します。
+This section describes the types of constraints and
+the steps to run optimization on models that require them.
 
 """
 
@@ -10,52 +10,55 @@ from pyfemtet.opt.optimizer import PoFBoTorchSampler
 
 
 def mises_stress(Femtet):
-    """フォンミーゼス応力を目的関数として計算します。
+    """Calculate the von Mises stress as the objective function.
 
-    この関数は、最適化の実行中に FEMOpt オブジェクトによって
-    自動的に呼び出されます。
+    This function is called automatically by the FEMOpt
+    object while the optimization is running.
 
-    引数:
-        Femtet: PyFemtet を使用して目的関数または拘束関数を
-            定義する場合、最初の引数は Femtet インスタンスを
-            取る必要があります。
+    Args:
+        Femtet: When defining an objective or constraint
+            function using PyFemtet, the first argument
+            must take a Femtet instance.
 
-    戻り値:
-        float: 目的または拘束関数は単一の float を返すよう定義してください。
+    Returns:
+        float: A single float representing the expression value you want to constrain.
     """
     return Femtet.Gogh.Galileo.GetMaxStress_py()[2]
 
 
 def radius_diff(Femtet, opt):
-    """パイプの外側の半径と内側の半径の差を計算します。
+    """Calculate the difference between the outer and inner radii of the pipe.
 
-    この拘束は、最適化の実行中にパイプの内側の半径が
-    外側の半径を超えないようにするために呼び出されます。
+    This constraint is called to ensure that the
+    inner radius of the pipe does not exceed the
+    outer radius while the optimization is running.
 
-    注意:
-        OptunaOptimizer の BoTorchSampler を使用していて、
-        strict な拘束を使用する場合、パラメータを提案するため
-        に繰り返し計算が必要になるため、Femtet へのアクセスが
-        非常に遅くなる可能性があることに注意してください。
-        この関数の例のように、Femtet にアクセスするのではなく、
-        Optimizer オブジェクトを介してパラメータを取得して計算
-        を実行することをお勧めします。
+    Note:
+        If you are using BoTorchSampler of OptunaOptimizer
+        and use strict constraints, be aware that accessing
+        the Femtet can be very slow, as it requires repeated
+        calculations to propose parameters.
+        We recommend that you do not access the Femtet,
+        but rather get the parameters and perform the
+        calculations via the Optimizer object, as in this
+        function example.
 
-        非推奨::
+        NOT recommended::
 
             p = Femtet.GetVariableValue('p')
 
-        代わりに::
+        instead, use optimizer::
 
             params = opt.get_parameter()
             p = params['p']
 
-    引数:
-        Femtet: PyFemtet を使用して目的関数または拘束関数を
-            定義する場合、最初の引数は Femtet インスタンスを
-            取る必要があります。
-        opt: このオブジェクトを使用すると、Femtet を経由せず
-            に外側の半径と内側の半径の値を取得できます。
+    Args:
+        Femtet: When defining an objective or constraint
+            function using PyFemtet, the first argument
+            must take a Femtet instance.
+        opt: This object allows you to obtain the outer
+            radius and inner radius values without going
+            through Femtet.
     """
     params = opt.get_parameter()
     internal_r = params['internal_r']
@@ -64,30 +67,31 @@ def radius_diff(Femtet, opt):
 
 
 if __name__ == '__main__':
-    # 最適化手法のセットアップ
+    # Setup optimization method
     opt = OptunaOptimizer(
         sampler_class=PoFBoTorchSampler,
         sampler_kwargs=dict(
-            n_startup_trials=3,  # 最初の 3 回はランダムサンプリングを行います。
+            n_startup_trials=3,  # The first three samples are randomly sampled.
         )
     )
     femopt = FEMOpt(opt=opt)
 
-    # 変数の追加
+    # Add parameters
     femopt.add_parameter("external_r", 10, lower_bound=0.1, upper_bound=10)
     femopt.add_parameter("internal_r", 5, lower_bound=0.1, upper_bound=10)
 
-    # 最適化の実行中に外側の半径を超えないように strict 拘束を追加します。
+    # Add the strict constraint not to exceed the
+    # outer radius while the optimization is running.
     femopt.add_constraint(
-        fun=radius_diff,  # 拘束関数 (ここでは 外半径 - 内半径).
-        name='管厚さ',  # 拘束関数にはプログラム上の名前とは別に自由な名前を付与できます.
-        lower_bound=1,  # 拘束関数の下限 (ここでは管の厚みを最低 1 とする).
-        args=(femopt.opt,)  # 拘束関数に渡される、Femtet 以外の追加の引数.
+        fun=radius_diff,  # Constraint function (returns external radius - internal radius).
+        name='wall thickness',  # You can name the function anything you want.
+        lower_bound=1,  # Lower bound of constraint function (set minimum wall thickness is 1).
+        args=(femopt.opt,)  # Additional arguments passed to the function.
     )
 
-    # 目的関数の追加
-    femopt.add_objective(fun=mises_stress, name='ミーゼス応力')
+    # Add the objective
+    femopt.add_objective(fun=mises_stress, name='Mises Stress')
 
-    # 最適化の実行
+    # Run optimization.
     femopt.set_random_seed(42)
     femopt.optimize(n_trials=10)

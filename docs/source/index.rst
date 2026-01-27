@@ -101,8 +101,8 @@ Below is an example of multi-objective optimization. You can set up the problem 
        femopt = FEMOpt()
        femopt.add_parameter('w', 10, 2, 20)
        femopt.add_parameter('d', 10, 2, 20)
-       femopt.add_objective(max_displacement, name='max_displacement', direction=0)
-       femopt.add_objective(volume, name='volume', direction='minimize')
+       femopt.add_objective(name='max_displacement', fun=max_displacement, direction=0)
+       femopt.add_objective(name='volume', fun=volume, direction='minimize')
        femopt.optimize(n_trials=20)
 
 

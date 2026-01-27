@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-24 16:21+0900\n"
+"POT-Creation-Date: 2026-01-27 14:41+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -122,7 +122,9 @@ msgstr ""
 #: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.update_parameter:0
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface:0
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.connect_femtet:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.load_objectives:0
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.open:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update_parameter:0
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.use_parametric_output_as_objective:0
 #: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface:0
 #: ../../pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:docstring of pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface:0
@@ -241,6 +243,8 @@ msgstr ""
 #: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.AbstractFEMInterface.update_parameter:0
 #: ../../pyfemtet/opt/interface/_base_interface.py:docstring of pyfemtet.opt.interface._base_interface.NoFEM.update:0
 #: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface.ExcelInterface.object_pass_to_fun:0
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.get_femtet_addin_path:0
+#: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.get_femtet_ref_path:0
 #: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.load_variables:0
 #: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.update:0
 #: ../../pyfemtet/opt/interface/_excel_interface/excel_interface.py:docstring of pyfemtet.opt.interface._excel_interface.excel_interface.ExcelInterface.update_parameter:0
@@ -248,13 +252,20 @@ msgstr ""
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface.FemtetInterface.object_pass_to_fun:0
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.femtet_is_alive:0
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.open:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.solve:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update_model:0
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update_parameter:0
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.use_parametric_output_as_objective:0
 #: ../../pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:docstring of pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.update_parameter:0
+#: ../../pyfemtet/opt/interface/_multiple_fem_interface.py:docstring of pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.append:0
 #: ../../pyfemtet/opt/interface/_multiple_fem_interface.py:docstring of pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.pop:0
+#: ../../pyfemtet/opt/interface/_multiple_fem_interface.py:docstring of pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.remove:0
 #: ../../pyfemtet/opt/interface/_multiple_fem_interface.py:docstring of pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.trial_postprocess:0
 #: ../../pyfemtet/opt/interface/_multiple_fem_interface.py:docstring of pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.trial_postprocess_per_fidelity:0
 #: ../../pyfemtet/opt/interface/_multiple_fem_interface.py:docstring of pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.trial_preprocess:0
 #: ../../pyfemtet/opt/interface/_multiple_fem_interface.py:docstring of pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.trial_preprocess_per_fidelity:0
+#: ../../pyfemtet/opt/interface/_multiple_fem_interface.py:docstring of pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.update:0
 #: ../../pyfemtet/opt/interface/_multiple_fem_interface.py:docstring of pyfemtet.opt.interface._multiple_fem_interface.FEMListInterface.update_parameter:0
 #: ../../pyfemtet/opt/interface/_surrogate_model_interface/botorch_interface.py:docstring of pyfemtet.opt.interface._surrogate_model_interface.botorch_interface.BoTorchInterface.update:0
 #: ../../pyfemtet/opt/interface/_surrogate_model_interface/botorch_interface.py:docstring of pyfemtet.opt.interface._surrogate_model_interface.botorch_interface.PoFBoTorchInterface.update:0
@@ -539,8 +550,43 @@ msgstr ""
 msgid "Open specific analysis model with connected Femtet."
 msgstr ""
 
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.postprocess:1
+msgid "A method called just after :func:`solve`."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.postprocess:3
+msgid "This method is called just after solve. By inheriting from the Interface class and overriding this method, it is possible to perform any desired postprocessing after the solve and before evaluating objectives."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.preprocess:1
+msgid "A method called just before :func:`solve`."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.preprocess:3
+msgid "This method is called just before solve. By inheriting from the Interface class and overriding this method, it is possible to perform any desired preprocessing after the model update and before solving."
+msgstr ""
+
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.quit:1
 msgid "Force to terminate connected Femtet."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.solve:1
+msgid "Execute FEM analysis."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update:1
+msgid "See :func:`FEMInterface.update`"
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update_model:1
+#: ../../pyfemtet/opt/interface/_femtet_with_nx_interface/femtet_with_nx_interface.py:docstring of pyfemtet.opt.interface._femtet_with_nx_interface.femtet_with_nx_interface.FemtetWithNXInterface.update_model:1
+#: ../../pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:docstring of pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.update_model:1
+msgid "Updates the analysis model only."
+msgstr ""
+
+#: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.update_parameter:1
+#: ../../pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:docstring of pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.update_parameter:1
+msgid "Update parameter of femprj."
 msgstr ""
 
 #: ../../pyfemtet/opt/interface/_femtet_interface/femtet_interface.py:docstring of pyfemtet.opt.interface._femtet_interface.femtet_interface.FemtetInterface.use_parametric_output_as_objective:1
@@ -652,10 +698,6 @@ msgstr ""
 
 #: ../../pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:docstring of pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface:28
 msgid "If True, SolidWorks will be started in visible mode. Defaults to True."
-msgstr ""
-
-#: ../../pyfemtet/opt/interface/_femtet_with_solidworks/femtet_with_solidworks_interface.py:docstring of pyfemtet.opt.interface._femtet_with_solidworks.femtet_with_solidworks_interface.FemtetWithSolidworksInterface.update_model:1
-msgid "Update .sldprt"
 msgstr ""
 
 #: ../../pyfemtet/opt/optimizer/_base_optimizer.py:docstring of pyfemtet.opt.optimizer._base_optimizer.SubFidelityModel:1

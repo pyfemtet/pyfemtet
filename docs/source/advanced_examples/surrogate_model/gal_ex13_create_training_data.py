@@ -17,39 +17,42 @@ if __name__ == '__main__':
 
     os.chdir(os.path.dirname(__file__))
 
-    # Femtet との接続を行います。
+    # Connect to Femtet.
     fem = FemtetInterface(
         femprj_path='gal_ex13_parametric.femprj',
     )
 
-    # 最適化用オブジェクトの設定を行います。
-    # ただしこのスクリプトでは最適化ではなく
-    # 学習データ作成を行うので、 optuna の
-    # ランダムサンプリングクラスを用いて
-    # 設計変数の選定を行います。
+    # Initialize the optimization object.
+    # However, this script is not for optimization;
+    # instead, it is for creating training data.
+    # Therefore, we will use Optuna's random sampling
+    # class to select the design variables.
     opt = OptunaOptimizer(
         sampler_class=RandomSampler,
     )
 
-    # FEMOpt オブジェクトを設定します。
+    # We will set up the FEMOpt object. 
     femopt = FEMOpt(
         fem=fem,
         opt=opt,
     )
 
-    # 設計変数を設定します。
+    # Set the design variables.
     femopt.add_parameter('length', 0.1, 0.02, 0.2)
     femopt.add_parameter('width', 0.01, 0.001, 0.02)
     femopt.add_parameter('base_radius', 0.008, 0.006, 0.01)
-    # 目的関数を設定します。ランダムサンプリングなので
-    # direction は指定してもサンプリングに影響しません。
-    femopt.add_objective(fun=get_res_freq, name='第一共振周波数(Hz)')
 
-    # 学習データ作成を行います。
-    # 終了条件を指定しない場合、手動で停止するまで
-    # 学習データ作成を続けます。
-    # 最適化スクリプトで history_path を参照するため、
-    # わかりやすい csv ファイル名を指定します。
+    # Set the objective function. Since this is random
+    # sampling, specifying the direction does not affect
+    # the sampling.
+    femopt.add_objective(fun=get_res_freq, name='First Resonant Frequency (Hz)')
+
+    # Create the training data.
+    # If no termination condition is specified,
+    # it will continue creating training data until
+    # manually stopped.
+    # To refer to history_path in the optimization script, we will
+    # specify a clear CSV file name.
     femopt.set_random_seed(42)
     femopt.optimize(
         history_path='training_data.csv',

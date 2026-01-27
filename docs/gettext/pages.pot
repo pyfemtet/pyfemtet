@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-24 16:21+0900\n"
+"POT-Creation-Date: 2026-01-27 14:41+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,7 +21,7 @@ msgid "License"
 msgstr ""
 
 #: ../../LICENSE:1
-msgid "Copyright 2025 Kazuma NAITO"
+msgid "Copyright 2025 pyfemtet developers"
 msgstr ""
 
 #: ../../LICENSE:3
@@ -105,7 +105,7 @@ msgid ":py:obj:`pyfemtet.opt.FemtetInterface <pyfemtet.opt.FemtetInterface>`\\ \
 msgstr ""
 
 #: ../source/pages/api.rst:16:<autosummary>:1
-#: ../source/pages/api.rst:31:<autosummary>:1
+#: ../source/pages/api.rst:32:<autosummary>:1
 msgid "Control Femtet from optimizer."
 msgstr ""
 
@@ -114,7 +114,7 @@ msgid ":py:obj:`pyfemtet.opt.OptunaOptimizer <pyfemtet.opt.OptunaOptimizer>`\\ \
 msgstr ""
 
 #: ../source/pages/api.rst:16:<autosummary>:1
-#: ../source/pages/api.rst:40:<autosummary>:1
+#: ../source/pages/api.rst:41:<autosummary>:1
 msgid "An optimizer class utilizing Optuna for hyperparameter optimization."
 msgstr ""
 
@@ -126,47 +126,55 @@ msgstr ""
 msgid "FEM Interfaces"
 msgstr ""
 
-#: ../source/pages/api.rst:31:<autosummary>:1
+#: ../source/pages/api.rst:32:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.interface.NoFEM <pyfemtet.opt.interface.NoFEM>`\\ \\(\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:31:<autosummary>:1
+#: ../source/pages/api.rst:32:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.interface.FemtetInterface <pyfemtet.opt.interface.FemtetInterface>`\\ \\(\\[...\\]\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:31:<autosummary>:1
+#: ../source/pages/api.rst:32:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.interface.FemtetWithSolidworksInterface <pyfemtet.opt.interface.FemtetWithSolidworksInterface>`\\ \\(...\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:31:<autosummary>:1
+#: ../source/pages/api.rst:32:<autosummary>:1
 msgid "Interface class integrating Femtet and SolidWorks operations."
 msgstr ""
 
-#: ../source/pages/api.rst:31:<autosummary>:1
+#: ../source/pages/api.rst:32:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.interface.FemtetWithNXInterface <pyfemtet.opt.interface.FemtetWithNXInterface>`\\ \\(...\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:31:<autosummary>:1
+#: ../source/pages/api.rst:32:<autosummary>:1
 msgid "Control Femtet and NX."
 msgstr ""
 
-#: ../source/pages/api.rst:33
+#: ../source/pages/api.rst:32:<autosummary>:1
+msgid ":py:obj:`pyfemtet.opt.interface.ExcelInterface <pyfemtet.opt.interface.ExcelInterface>`\\ \\(...\\[\\, ...\\]\\)"
+msgstr ""
+
+#: ../source/pages/api.rst:32:<autosummary>:1
+msgid "Excel を計算コアとして利用するためのクラス。"
+msgstr ""
+
+#: ../source/pages/api.rst:34
 msgid "Optimizers"
 msgstr ""
 
-#: ../source/pages/api.rst:40:<autosummary>:1
+#: ../source/pages/api.rst:41:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.optimizer.OptunaOptimizer <pyfemtet.opt.optimizer.OptunaOptimizer>`\\ \\(\\[...\\]\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:40:<autosummary>:1
+#: ../source/pages/api.rst:41:<autosummary>:1
 msgid ":py:obj:`pyfemtet.opt.optimizer.ScipyOptimizer <pyfemtet.opt.optimizer.ScipyOptimizer>`\\ \\(\\[...\\]\\)"
 msgstr ""
 
-#: ../source/pages/api.rst:40:<autosummary>:1
+#: ../source/pages/api.rst:41:<autosummary>:1
 msgid "Optimizer class that utilizes SciPy optimization methods."
 msgstr ""
 
-#: ../source/pages/api.rst:42
+#: ../source/pages/api.rst:43
 msgid "Entire Reference"
 msgstr ""
 
@@ -375,7 +383,7 @@ msgid "This step requires administrator privileges."
 msgstr ""
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:11
-msgid "This procedure requires Python 3.11, 3.12 or 3.13. If you are installing PyFemtet on a different version of Python, follow the manual instructions at the end of this page."
+msgid "This procedure requires Python 3.10 ~ 3.14. If you are installing PyFemtet on a different version of Python, follow the manual instructions at the end of this page."
 msgstr ""
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:16
@@ -688,7 +696,7 @@ msgstr ""
 
 #: ../source/pages/script_builder.rst:20
 #: ../source/pages/usage_pages/how_to_use_result_viewer.rst:14
-msgid "If you successfully ran `onestop-installer`, you already have the GUI tool."
+msgid "If you successfully ran `pyfemtet-installer`, you already have the GUI tool."
 msgstr ""
 
 #: ../source/pages/script_builder.rst:22
@@ -728,7 +736,7 @@ msgid "Finally, you will get a ``.py`` script to run optimization with your ``.f
 msgstr ""
 
 #: ../source/pages/script_builder.rst:51
-msgid "If you fail to install ``pyfemtet-opt-gui`` via `onestop-installer`, run::"
+msgid "If you fail to install ``pyfemtet-opt-gui`` via `pyfemtet-installer`, run::"
 msgstr ""
 
 #: ../source/pages/script_builder.rst:55

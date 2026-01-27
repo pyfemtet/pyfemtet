@@ -10,48 +10,58 @@ def main(target):
 
     os.chdir(os.path.dirname(__file__))
 
-    # Femtet との接続の代わりに、サロゲートモデルを作成します。
-    # 学習データ作成スクリプトで作成した csv ファイルを読み込んで
-    # サロゲートモデルを作成します。
+    # Instead of connecting with Femtet, create
+    # a surrogate model. Read the CSV file created
+    # by the training data creation script to build
+    # the surrogate model.
     fem = PoFBoTorchInterface(
         history_path='training_data.csv'
     )
 
-    # 最適化用オブジェクトの設定を行います。
+    # Set up the optimization object.
     opt = OptunaOptimizer(
         sampler_class=TPESampler,
     )
 
-    # FEMOpt オブジェクトの設定を行います。
+    # Set up the FEMOpt object.
     femopt = FEMOpt(
         fem=fem,
         opt=opt,
     )
 
-    # 設計変数の設定を行います。
-    # 上下限は学習データ作成スクリプトと異なっても良いですが、
-    # 学習していない範囲は外挿となりサロゲートモデルによる
-    # 予測精度が低下することに注意してください。
+    # Set up the design variables.
+    # The upper and lower limits can differ from
+    # those in the training data creation script,
+    # but please note that extrapolation will
+    # occur outside the range that has not been
+    # trained, which may reduce the prediction
+    # accuracy of the surrogate model.
     femopt.add_parameter('length', 0.1, 0.02, 0.2)
     femopt.add_parameter('width', 0.01, 0.001, 0.02)
 
-    # 学習時は設計変数としていたが最適化時に固定したいパラメータがある場合
-    # initial_value のみを指定して fix 引数を True にしてください。
-    # 学習時に設定しなかった設計変数を最適化時に追加することはできません。
+    # If there are parameters that were set as
+    # design variables during training and wanted
+    # to fix during optimization, specify only the
+    # `initial_value` and set the `fix` argument True.
+    # You cannot add design variables that were not
+    # set during training for optimization.
     femopt.add_parameter('base_radius', 0.008, fix=True)
 
-    # 学習時に設定した目的関数のうち
-    # 最適化したいものを指定します。
-    # fun 引数は与えてもいいですが、サロゲートモデル作成時に上書きされるため無視されます。
-    # 学習時に設定しなかった目的関数を最適化時に使用することはできません。
-    obj_name = '第一共振周波数(Hz)'
+    # Specify the objective functions set during
+    # training that you want to optimize.
+    # You may provide the fun argument, but it will
+    # be overwritten during surrogate model creation,
+    # so it will be ignored.
+    # You cannot use objective functions that were
+    # not set during training for optimization.
+    obj_name = 'First Resonant Frequency (Hz)'
     femopt.add_objective(
         name=obj_name,
         fun=None,
         direction=target,
     )
 
-    # 最適化を実行します。
+    # Execute the optimization.
     femopt.set_random_seed(42)
     df = femopt.optimize(
         n_trials=50,
@@ -59,16 +69,16 @@ def main(target):
         history_path=f'optimized_result_target_{target}.csv'
     )
 
-    # 最適解を表示します。
+    # Display the optimal solution.
     prm_names = femopt.opt.history.prm_names
     obj_names = femopt.opt.history.obj_names
     prm_values = df[df['optimality'] == True][prm_names].values[0]
     obj_values = df[df['optimality'] == True][obj_names].values[0]
 
     message = f'''
-===== 最適化結果 =====    
-ターゲット値: {target}
-サロゲートモデルによる予測:
+===== Optimization Results =====
+Target Value: {target}
+Prediction by Surrogate Model:
 '''
     for name, value in zip(prm_names, prm_values):
         message += f'  {name}: {value}\n'
@@ -79,12 +89,12 @@ def main(target):
 
 
 if __name__ == '__main__':
-    # 学習データから作成したサロゲートモデルで
-    # 共振周波数が 1000 になる設計を見つけます。
+    # Using the surrogate model created from the training data,
+    # we will find a design that results in a resonant frequency of 1000.
     message_1000 = main(target=1000)
 
-    # 続いて、同じサロゲートモデルで
-    # 共振周波数が 2000 になる設計を見つけます。
+    # Next, using the same surrogate model,
+    # we will find a design that results in a resonant frequency of 2000.
     message_2000 = main(target=2000)
 
     print(message_1000)

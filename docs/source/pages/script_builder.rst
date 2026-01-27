@@ -17,7 +17,7 @@ Installation
 
 .. note:: 
     
-    If you successfully ran `onestop-installer`, you already have the GUI tool.
+    If you successfully ran `pyfemtet-installer`, you already have the GUI tool.
 
     More information, see :doc:`installation_pages/install_pyfemtet` or :ref:`manualinstallation` .
 
@@ -48,7 +48,7 @@ Finally, you will get a ``.py`` script to run optimization with your ``.femprj``
 Manual Installation
 -------------------
 
-If you fail to install ``pyfemtet-opt-gui`` via `onestop-installer`, run::
+If you fail to install ``pyfemtet-opt-gui`` via `pyfemtet-installer`, run::
 
     py -m pip install pyfemtet-opt-gui --no-warn-script-location
 

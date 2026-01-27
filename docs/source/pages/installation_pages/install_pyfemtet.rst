@@ -8,7 +8,7 @@ This step requires administrator privileges.
 
 .. note::
     
-    This procedure requires Python 3.11, 3.12 or 3.13. If you are installing
+    This procedure requires Python 3.10 ~ 3.14. If you are installing
     PyFemtet on a different version of Python, follow the manual
     instructions at the end of this page.
 

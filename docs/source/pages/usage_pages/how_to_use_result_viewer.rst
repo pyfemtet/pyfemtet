@@ -11,7 +11,7 @@ Installation
 
 .. note:: 
     
-    If you successfully ran `onestop-installer`, you already have the GUI tool.
+    If you successfully ran `pyfemtet-installer`, you already have the GUI tool.
 
     See :doc:`../installation_pages/install_pyfemtet` or :doc:`../installation_pages/install_pyfemtet_manually` .
 

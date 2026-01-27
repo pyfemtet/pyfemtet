@@ -60,7 +60,7 @@ This page demonstrates how to create a program for conducting optimal design usi
             femopt.add_parameter('d', 10, 2, 20)
 
             # objective setting
-            femopt.add_objective(max_displacement, direction=0)
+            femopt.add_objective('max_displacement', max_displacement, direction=0)
 
             # run optimization
             femopt.optimize()

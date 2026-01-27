@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     femopt.add_parameter("external_radius", 10, 1, 10)
     femopt.add_parameter("internal_radius", 5, 1, 10)
-    femopt.add_constraint(name='管厚さ', fun=ex_in, lower_bound=1, strict=True, args=(femopt.opt,))
+    femopt.add_constraint(name='thickness', fun=ex_in, lower_bound=1, strict=True, args=(femopt.opt,))
     femopt.set_random_seed(42)
     femopt.optimize(
         n_trials=10,
