@@ -5,6 +5,7 @@ from packaging import version
 
 from tqdm import tqdm
 import torch
+import gpytorch
 
 from gpytorch.mlls import ExactMarginalLogLikelihood
 from gpytorch.kernels import MaternKernel, ScaleKernel  # , RBFKernel
@@ -37,8 +38,6 @@ __all__ = [
 
 
 def get_standardizer_and_no_noise_train_yvar(Y: torch.Tensor):
-    import gpytorch
-
     standardizer = Standardize(m=Y.shape[-1])
     min_noise = gpytorch.settings.min_fixed_noise.value(Y.dtype)
     standardizer.forward(Y)  # require to un-transform
@@ -50,19 +49,28 @@ def get_standardizer_and_no_noise_train_yvar(Y: torch.Tensor):
 def setup_yvar_and_standardizer(
         Y_: torch.Tensor,
         observation_noise_: str | float | None,
-) -> tuple[torch.Tensor | None, Standardize]:
-
+        use_outcome_transform: bool = True,
+) -> tuple[torch.Tensor | None, Standardize | None]:
     standardizer_ = None
     train_yvar_ = None
+
     if isinstance(observation_noise_, str):
         if observation_noise_.lower() == 'no':
-            train_yvar_, standardizer_ = get_standardizer_and_no_noise_train_yvar(Y_)
+            if use_outcome_transform:
+                # Standardize 経由で untransform して YVar を得る
+                train_yvar_, standardizer_ = get_standardizer_and_no_noise_train_yvar(Y_)
+            else:
+                # 外部で標準化済みの場合、min_noise をそのまま使用
+                min_noise = gpytorch.settings.min_fixed_noise.value(Y_.dtype)
+                train_yvar_ = torch.full_like(Y_, min_noise)
         else:
             raise NotImplementedError
     elif isinstance(observation_noise_, float):
+        # 正規化済みスケールの observation_noise を期待
         train_yvar_ = torch.full_like(Y_, observation_noise_)
 
-    standardizer_ = standardizer_ or Standardize(m=Y_.shape[-1])
+    if use_outcome_transform:
+        standardizer_ = standardizer_ or Standardize(m=Y_.shape[-1])
 
     return train_yvar_, standardizer_
 
@@ -115,12 +123,12 @@ def get_matern_kernel_with_gamma_prior_as_covar_module(
     )
 
 
-def setup_gp(X, Y, bounds, observation_noise, lh_class=None, covar_module=None):
+def setup_gp(X, Y, bounds, observation_noise, lh_class=None, covar_module=None, use_outcome_transform=True):
 
     lh_class = lh_class or ExactMarginalLogLikelihood
 
     train_yvar_, standardizer_ = setup_yvar_and_standardizer(
-        Y, observation_noise
+        Y, observation_noise, use_outcome_transform
     )
 
     model_ = SingleTaskGP(

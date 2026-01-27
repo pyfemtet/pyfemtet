@@ -28,6 +28,8 @@ class SingleTaskGPModel(AbstractModel):
 
     KWARGS = dict(dtype=torch.float64, device='cpu')
     gp: SingleTaskGP
+    y_mean: torch.Tensor  # Y の平均を保存（復元用）
+    y_std: torch.Tensor   # Y の標準偏差を保存（復元用）
 
     def fit(
             self,
@@ -44,6 +46,12 @@ class SingleTaskGPModel(AbstractModel):
         X = torch.tensor(x, **self.KWARGS)
         Y = torch.tensor(y, **self.KWARGS)
         B = torch.tensor(bounds, **self.KWARGS).transpose(1, 0) if bounds is not None else None
+
+        # Y を外部で標準化（BoTorch 内部の Standardize を使わない）
+        self.y_mean = Y.mean(dim=0, keepdim=True)
+        self.y_std = Y.std(dim=0, keepdim=True)
+        self.y_std[self.y_std == 0] = 1.0  # ゼロ除算防止
+        Y_normalized = (Y - self.y_mean) / self.y_std
 
         if covar_module_settings is not None:
             if covar_module_settings['name'] == 'matern_kernel_with_gamma_prior':
@@ -66,7 +74,8 @@ class SingleTaskGPModel(AbstractModel):
             else:
                 raise NotImplementedError(f'{covar_module_settings["name"]=}')
 
-        self.gp = setup_gp(X, Y, B, observation_noise, likelihood_class, covar_module)
+        # 標準化済み Y を渡し、outcome_transform を使用しない
+        self.gp = setup_gp(X, Y_normalized, B, observation_noise, likelihood_class, covar_module, use_outcome_transform=False)
 
     def predict(self, x: np.ndarray):
         assert hasattr(self, 'gp')
@@ -75,7 +84,14 @@ class SingleTaskGPModel(AbstractModel):
         with torch.no_grad():
             mean = post.mean.cpu().numpy()
             std = post.variance.sqrt().cpu().numpy()
-        return mean, std
+
+        # 元のスケールに復元
+        y_mean_np = self.y_mean.cpu().numpy()
+        y_std_np = self.y_std.cpu().numpy()
+        mean_restored = mean * y_std_np + y_mean_np
+        std_restored = std * y_std_np
+
+        return mean_restored, std_restored
 
 
 class PyFemtetModel:
