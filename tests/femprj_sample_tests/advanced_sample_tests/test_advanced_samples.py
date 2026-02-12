@@ -126,7 +126,7 @@ def test_excel_ui():
         for path in glob(r"C:\Program Files\Microsoft Office\root\Office16\XLSTART\*"):
             excel.Workbooks.Open(path)
         wb = excel.Workbooks.Open(distination_path)
-        ws = wb.WorkSheets("最適化の設定")
+        ws = wb.Worksheets("最適化の設定")
         ws.Range("C11").Value = 3  # n_trials
         ws.Range("C13").Value = 42  # seed
         ws.Range("C14").Value = history_path

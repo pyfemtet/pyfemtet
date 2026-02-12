@@ -31,7 +31,16 @@ class _ExcelDialogProcessor:
 
     def __init__(self, excel_, timeout, restore_book=True):
         self.excel = excel_
-        self.excel_pid = _get_pid(excel_.hWnd)
+
+        if hasattr(excel_, 'hWnd'):
+            self.excel_pid = _get_pid(excel_.hWnd)
+        elif hasattr(excel_, 'Hwnd'):
+            self.excel_pid = _get_pid(excel_.Hwnd)
+        elif hasattr(excel_, 'HWnd'):
+            self.excel_pid = _get_pid(excel_.HWnd)
+        else:
+            raise AttributeError('Cannot found excel window handle attribute.')
+
         self.__excel_window_title = f' - Excel'  # {basename} - Excel
         self.__error_dialog_title = 'Microsoft Visual Basic'
         self.__vbe_window_title = f'Microsoft Visual Basic for Applications - '  # Microsoft Visual Basic for Applications - {basename}

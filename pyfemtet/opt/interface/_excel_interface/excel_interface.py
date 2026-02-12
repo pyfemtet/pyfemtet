@@ -470,11 +470,19 @@ class ExcelInterface(COMInterface):
         sleep(0.5)
 
         # 起動した excel の pid を記憶する
-        self._excel_hwnd = self.excel.hWnd
+        if hasattr(self.excel, "hWnd"):
+            self._excel_hwnd = self.excel.hWnd
+        elif hasattr(self.excel, "Hwnd"):
+            self._excel_hwnd = self.excel.Hwnd
+        elif hasattr(self.excel, "HWnd"):
+            self._excel_hwnd = self.excel.HWnd
+        else:
+            raise RuntimeError('Failed to get Excel window handle. Cannot determine Excel process ID.')
+
         self._excel_pid = 0
         while self._excel_pid == 0:
             sleep(0.5)
-            self._excel_pid = _get_pid(self.excel.hWnd)
+            self._excel_pid = _get_pid(self._excel_hwnd)
 
         # 可視性の設定
         self.excel.Visible = self.visible
@@ -583,7 +591,13 @@ class ExcelInterface(COMInterface):
         self.remove_femtet_addin_reference(wb)
         femtet_addin_path = self.get_femtet_addin_path()
         if femtet_addin_path is not None:
-            wb.VBProject.References.AddFromFile(femtet_addin_path)
+            try:
+                wb.VBProject.References.AddFromFile(femtet_addin_path)
+            except com_error:
+                logger.warning(_(
+                    jp_message="Femtet のアドインファイルの参照の追加に失敗しました。すでに追加されている可能性があります。",
+                    en_message="Failed to add reference of Femtet add-in file. It may have already been added.",
+                )) 
 
     # ===== load =====
     def load_variables(self, opt: OptimizationDataPerFEM, raise_if_no_keyword=True) -> None:
@@ -776,13 +790,13 @@ class ExcelInterface(COMInterface):
     def objective_from_excel(self, _, name: str):
         r = 1 + search_r(self.output_xlsm_path, self.output_sheet_name, name)
         c = 1 + search_c(self.output_xlsm_path, self.output_sheet_name, ParseAsObjective.value)
-        v = self.sh_output.Cells(r, c).value
+        v = self.sh_output.Cells(r, c).Value
         return float(v)
 
     def constraint_from_excel(self, _, name: str):
         r = 1 + search_r(self.constraint_xlsm_path, self.constraint_sheet_name, name)
         c = 1 + search_c(self.constraint_xlsm_path, self.constraint_sheet_name, ParseAsConstraint.value)
-        v = self.sh_constraint.Cells(r, c).value
+        v = self.sh_constraint.Cells(r, c).Value
         return float(v)
 
     # ===== Workbook and WorkSheet =====
@@ -797,7 +811,13 @@ class ExcelInterface(COMInterface):
 
     @staticmethod
     def _get_sh(wb: CDispatch, name) -> CDispatch:
-        for sh in wb.WorkSheets:
+        if hasattr(wb, 'WorkSheets'):
+            sheets = wb.WorkSheets
+        elif hasattr(wb, 'Worksheets'):
+            sheets = wb.Worksheets
+        else:
+            raise RuntimeError('Failed to get Worksheets. Cannot determine sheet collection.')
+        for sh in sheets:
             if sh.Name == name:
                 return sh
         else:
@@ -857,7 +877,7 @@ class ExcelInterface(COMInterface):
         if self.use_named_range:
             for key, variable in self.current_prm_values.items():
                 try:
-                    self.sh_input.Range(key).value = variable.value
+                    self.sh_input.Range(key).Value = variable.value
                 except com_error:
                     logger.warning(
                         _(
@@ -874,7 +894,7 @@ class ExcelInterface(COMInterface):
             for name, variable in self.current_prm_values.items():
                 r = 1 + search_r(self.input_xlsm_path, self.input_sheet_name, name)
                 c = 1 + search_c(self.input_xlsm_path, self.input_sheet_name, ParseAsParameter.value)
-                self.sh_input.Cells(r, c).value = variable.value
+                self.sh_input.Cells(r, c).Value = variable.value
 
         # 再計算
         self.excel.CalculateFull()
