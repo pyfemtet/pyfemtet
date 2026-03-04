@@ -49,8 +49,8 @@ class FEMOpt:
 
     def __init__(
             self,
-            fem: AbstractFEMInterface = None,
-            opt: AbstractOptimizer = None,
+            fem: AbstractFEMInterface | None = None,
+            opt: AbstractOptimizer | None = None,
     ):
         self.opt: AbstractOptimizer = opt or OptunaOptimizer()
         
@@ -160,7 +160,7 @@ class FEMOpt:
             names: str | list[str],
             fun: Callable[..., Sequence[float]],
             n_return: int,
-            directions: DIRECTION | Sequence[DIRECTION] = None,
+            directions: DIRECTION | Sequence[DIRECTION] | None = None,
             args: tuple | None = None,
             kwargs: dict | None = None,
     ):
@@ -208,7 +208,7 @@ class FEMOpt:
     ):
         self.opt.set_termination_condition(func)
 
-    def set_monitor_host(self, host: str = None, port: int = None):
+    def set_monitor_host(self, host: str | None = None, port: int | None = None):
         """Sets the host IP address and the port of the process monitor.
 
         Args:
@@ -240,14 +240,14 @@ class FEMOpt:
 
     def optimize(
             self,
-            n_trials: int = None,
+            n_trials: int | None = None,
             n_parallel: int = 1,
-            timeout: float = None,
+            timeout: float | None = None,
             wait_setup: bool = True,
             confirm_before_exit: bool = True,
-            history_path: str = None,
+            history_path: str | None = None,
             with_monitor: bool = True,
-            scheduler_address: str = None,
+            scheduler_address: str | None = None,
             seed: int | None = None,
     ):
 
@@ -258,7 +258,7 @@ class FEMOpt:
                 ver=pyfemtet.__version__,
             )
         )
-        client: Client
+        client: Client | DummyClient
 
         # set arguments
         self.opt.n_trials = n_trials or self.opt.n_trials
@@ -274,7 +274,6 @@ class FEMOpt:
             worker_name_base = 'Sub'
             if n_parallel == 1:
                 cluster = nullcontext()
-                # noinspection PyTypeChecker
                 client = DummyClient()
 
             else:
@@ -534,137 +533,3 @@ class FEMOpt:
         logger.info(_('All processes are terminated.'))
 
         return df
-
-
-def debug_1():
-    # noinspection PyUnresolvedReferences
-    from time import sleep
-    # from pyfemtet.opt.optimizer import InterruptOptimization
-    import optuna
-    from pyfemtet.opt.interface import AbstractFEMInterface, NoFEM
-
-    def _parabola(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
-        x = _opt.get_variables('values')
-        # print(os.getpid())
-        # raise RuntimeError
-        # raise Interrupt
-        # if get_worker() is None:
-        #     raise RuntimeError
-        return (x ** 2).sum()
-
-    def _cns(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
-        x = _opt.get_variables('values')
-        return x[0]
-
-    _opt = OptunaOptimizer()
-    _opt.sampler = optuna.samplers.TPESampler(seed=42)
-    _opt.n_trials = 10
-
-    _fem = NoFEM()
-    _opt.fem = _fem
-
-    _args = (_opt,)
-
-    _opt.add_parameter('x1', 1, -1, 1, step=0.2)
-    _opt.add_parameter('x2', 1, -1, 1, step=0.2)
-
-    _opt.add_constraint('cns', _cns, lower_bound=-0.5, args=_args)
-
-    _opt.add_objective('obj', _parabola, args=_args)
-
-    _femopt = FEMOpt(fem=_fem, opt=_opt)
-    _femopt.opt = _opt
-    # _femopt.opt.history.path = 'v1test/femopt-restart-test.csv'
-    _femopt.optimize(n_parallel=2)
-
-    print(os.path.abspath(_femopt.opt.history.path))
-
-
-def substrate_size(Femtet):
-    """基板のXY平面上での専有面積を計算します。"""
-    substrate_w = Femtet.GetVariableValue('substrate_w')
-    substrate_d = Femtet.GetVariableValue('substrate_d')
-
-    # assert get_worker() is not None
-
-    return substrate_w * substrate_d  # 単位: mm2
-
-
-def debug_2():
-    from pyfemtet.opt.interface import FemtetInterface
-    from pyfemtet.opt.optimizer import OptunaOptimizer
-
-    fem = FemtetInterface(
-        femprj_path=os.path.join(os.path.dirname(__file__), 'wat_ex14_parametric_jp.femprj'),
-    )
-
-    opt = OptunaOptimizer()
-
-    opt.fem = fem
-
-    opt.add_parameter(name="substrate_w", initial_value=40, lower_bound=22, upper_bound=60)
-    opt.add_parameter(name="substrate_d", initial_value=60, lower_bound=34, upper_bound=60)
-    opt.add_objective(name='基板サイズ(mm2)', fun=substrate_size)
-    opt.add_objective(name='obj2', fun=substrate_size)
-    opt.add_objective(name='obj3', fun=substrate_size)
-
-    opt.n_trials = 10
-    # opt.history.path = os.path.join(os.path.dirname(__file__), 'femtet-test.csv')
-
-    femopt = FEMOpt()
-
-    femopt.opt = opt
-
-    femopt.optimize(n_parallel=1)
-
-
-def debug_3():
-    # noinspection PyUnresolvedReferences
-    from time import sleep
-    # from pyfemtet.opt.optimizer import InterruptOptimization
-    import optuna
-    from pyfemtet.opt.interface import AbstractFEMInterface, NoFEM
-
-    def _parabola(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
-        x = _opt.get_variables('values')
-        # print(os.getpid())
-        # raise RuntimeError
-        # raise Interrupt
-        # if get_worker() is None:
-        #     raise RuntimeError
-        return (x ** 2).sum()
-
-    def _cns(_fem: AbstractFEMInterface, _opt: AbstractOptimizer):
-        x = _opt.get_variables('values')
-        return x[0]
-
-    _opt = OptunaOptimizer()
-    _opt.sampler = optuna.samplers.TPESampler(seed=42)
-
-    _fem = NoFEM()
-    _opt.fem = _fem
-
-    _args = (_opt,)
-
-    _opt.add_parameter('x1', 1, -1, 1, step=0.2)
-    _opt.add_parameter('x2', 1, -1, 1, step=0.2)
-
-    _opt.add_constraint('cns', _cns, lower_bound=-0.5, args=_args)
-
-    _opt.add_objective('obj', _parabola, args=_args)
-
-    _femopt = FEMOpt(fem=_fem, opt=_opt)
-    _femopt.optimize(
-        scheduler_address='<dask scheduler で起動したスケジューラの tcp をここに入力>',
-        n_trials=80,
-        n_parallel=6,
-        with_monitor=True,
-        confirm_before_exit=False,
-    )
-
-
-if __name__ == '__main__':
-    # for i in range(1):
-        debug_1()
-    # debug_2()
-    # debug_3()
