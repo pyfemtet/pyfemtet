@@ -223,7 +223,6 @@ def add_parametric_results_as_objectives(opt, Femtet, indexes, directions) -> bo
         # objective value function
         opt.add_objective(
             name=name, fun=_parametric_objective, direction=direction, args=(i,),
-            supress_duplicated_name_check=True,            
         )
     return True  # ここまで来たら成功
 

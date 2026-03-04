@@ -84,6 +84,11 @@ class OptimizationData:
         self._initialize_objectives()
         self.constraints = Constraints()
         self.other_outputs = Functions()
+        self._suppress_duplicate_name_check = False
+
+    def _check_duplicated_name(self, name, names, suppress=False):
+        if not suppress and not self._suppress_duplicate_name_check:
+            _duplicated_name_check(name, names)
 
     def add_constant_value(
             self,
@@ -110,8 +115,7 @@ class OptimizationData:
         var.value = value
         var.pass_to_fem = pass_to_fem
         var.properties = properties if properties is not None else {}
-        if not supress_duplicated_name_check:
-            _duplicated_name_check(name, self.variable_manager.variables.keys())
+        self._check_duplicated_name(name, self.variable_manager.variables.keys(), supress_duplicated_name_check)
         self.variable_manager.set_variable(var)
         return var
 
@@ -141,8 +145,7 @@ class OptimizationData:
         prm.step = step
         prm.properties = properties
         prm.pass_to_fem = pass_to_fem
-        if not supress_duplicated_name_check:
-            _duplicated_name_check(name, self.variable_manager.variables.keys())
+        self._check_duplicated_name(name, self.variable_manager.variables.keys(), supress_duplicated_name_check)
         self.variable_manager.set_variable(prm)
         return prm
 
@@ -162,8 +165,7 @@ class OptimizationData:
         )
         var.properties = properties or dict()
         var.pass_to_fem = pass_to_fem
-        if not supress_duplicated_name_check:
-            _duplicated_name_check(name, self.variable_manager.variables.keys())
+        self._check_duplicated_name(name, self.variable_manager.variables.keys(), supress_duplicated_name_check)
         self.variable_manager.set_variable(var)
         return var
 
@@ -181,8 +183,7 @@ class OptimizationData:
         var._expr = ExpressionFromString.InternalClass(sympy_expr=sympy_expr)
         var.properties = properties or dict()
         var.pass_to_fem = pass_to_fem
-        if not supress_duplicated_name_check:
-            _duplicated_name_check(name, self.variable_manager.variables.keys())
+        self._check_duplicated_name(name, self.variable_manager.variables.keys(), supress_duplicated_name_check)
         self.variable_manager.set_variable(var)
         return var
 
@@ -204,8 +205,7 @@ class OptimizationData:
         var.kwargs = kwargs or dict()
         var.properties = properties or dict()
         var.pass_to_fem = pass_to_fem
-        if not supress_duplicated_name_check:
-            _duplicated_name_check(name, self.variable_manager.variables.keys())
+        self._check_duplicated_name(name, self.variable_manager.variables.keys(), supress_duplicated_name_check)
         self.variable_manager.set_variable(var)
         return var
 
@@ -231,8 +231,7 @@ class OptimizationData:
         prm.choices = choices
         prm.properties = properties
         prm.pass_to_fem = pass_to_fem
-        if not supress_duplicated_name_check:
-            _duplicated_name_check(name, self.variable_manager.variables.keys())
+        self._check_duplicated_name(name, self.variable_manager.variables.keys(), supress_duplicated_name_check)
         self.variable_manager.set_variable(prm)
         return prm
 
@@ -251,8 +250,7 @@ class OptimizationData:
         obj.kwargs = kwargs or {}
         obj.direction = direction
         obj.fem_ctx = None
-        if not supress_duplicated_name_check:
-            _duplicated_name_check(name, self.objectives.keys())
+        self._check_duplicated_name(name, self.objectives.keys(), supress_duplicated_name_check)
         self.objectives.update({name: obj})
         return obj  # Context で fem_ctx をセットするために返す
 
@@ -334,8 +332,7 @@ class OptimizationData:
         cns.hard = strict
         cns.fem_ctx = None
         cns.using_fem = using_fem
-        if not supress_duplicated_name_check:
-            _duplicated_name_check(name, self.constraints.keys())
+        self._check_duplicated_name(name, self.constraints.keys(), supress_duplicated_name_check)
         self.constraints.update({name: cns})
         return cns  # Context で fem_ctx をセットするために返す
 
@@ -352,8 +349,7 @@ class OptimizationData:
         other_func.args = args or ()
         other_func.kwargs = kwargs or {}
         other_func.fem_ctx = None
-        if not supress_duplicated_name_check:
-            _duplicated_name_check(name, self.other_outputs.keys())
+        self._check_duplicated_name(name, self.other_outputs.keys(), supress_duplicated_name_check)
         self.other_outputs.update({name: other_func})
         return other_func
 
@@ -1390,27 +1386,42 @@ class AbstractOptimizer(OptimizationData):
         return LoggingOutput()
 
     def _refresh_problem(self):
-        # ctx の内容が減っている場合でも検出できるように初期化
-        self._initialize_problem()
 
-        for ctx in self.fem_manager.contexts:
-            # femlist が _load すると各 FEMInterface が
-            # 想定するのと異なる object_pass_to_fun (=Sequence)が
-            # 渡されてしまうので、
-            # 各 context のみが _load_... を行う必要がある。
-            if not isinstance(ctx, GlobalOptimizationData):
-                ctx._load_problem_from_fem()
+        class SuppressDuplicateNameCheck:
 
-            # optimizer に反映する
-            self.objectives.update(ctx.objectives)
-            self.constraints.update(ctx.constraints)
-            self.other_outputs.update(ctx.other_outputs)
-            self.variable_manager.variables.update(ctx.variable_manager.variables)
+            def __init__(self, opt: OptimizationData):
+                self._opt = opt
 
-        # 特殊処理が必要な場合は最後に fem の責任で行う
-        for ctx in self.fem_manager.contexts:
-            if not isinstance(ctx, GlobalOptimizationData):
-                ctx.fem.contact_to_optimizer(self, self.fem_manager.global_data, ctx)
+            def __enter__(self_):
+                self_._opt._suppress_duplicate_name_check = True
+
+            def __exit__(self_, exc_type, exc_val, exc_tb):
+                self_._opt._suppress_duplicate_name_check = False
+
+        with SuppressDuplicateNameCheck(self):
+            # ctx の内容が減っている場合でも検出できるように初期化
+            self._initialize_problem()
+
+            for ctx in self.fem_manager.contexts:
+                with SuppressDuplicateNameCheck(ctx):
+                    # femlist が _load すると各 FEMInterface が
+                    # 想定するのと異なる object_pass_to_fun (=Sequence)が
+                    # 渡されてしまうので、
+                    # 各 context のみが _load_... を行う必要がある。
+                    if not isinstance(ctx, GlobalOptimizationData):
+                        ctx._load_problem_from_fem()
+
+                    # optimizer に反映する
+                    self.objectives.update(ctx.objectives)
+                    self.constraints.update(ctx.constraints)
+                    self.other_outputs.update(ctx.other_outputs)
+                    self.variable_manager.variables.update(ctx.variable_manager.variables)
+
+            # 特殊処理が必要な場合は最後に fem の責任で行う
+            for ctx in self.fem_manager.contexts:
+                if not isinstance(ctx, GlobalOptimizationData):
+                    with SuppressDuplicateNameCheck(ctx):
+                        ctx.fem.contact_to_optimizer(self, self.fem_manager.global_data, ctx)
 
     # noinspection PyMethodMayBeStatic
     def _get_additional_data(self) -> dict:

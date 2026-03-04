@@ -122,7 +122,7 @@ class AbstractSurrogateModelInterfaceBase(AbstractFEMInterface):
             def dummy(*args, **kwargs):
                 assert False
 
-            ctx.add_objective(obj_name, dummy, direction, supress_duplicated_name_check=True)
+            ctx.add_objective(obj_name, dummy, direction)
         
         # ctx の目的関数のうち train に含まれるものを差し替え
         # directions の目的変数名を validation しているので漏れはないはず
