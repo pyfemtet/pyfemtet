@@ -469,8 +469,21 @@ class OptimizationDataPerFEM(OptimizationData):
         )
 
     def _y_common(self, fem: AbstractFEMInterface) -> TrialOutput:
+
+        if len(self.objectives) > 0:
+            logger.info(_(
+                en_message='Evaluating objective functions for {fem_name}...',
+                jp_message='{fem_name} の目的関数を評価しています...',
+                fem_name=fem.name,
+            ))
+
         out = TrialOutput()
         for name, obj in self.objectives.items():
+            logger.info(_(
+                en_message='  Evaluating objective function {obj_name}...',
+                jp_message='  目的関数 {obj_name} を評価しています...',
+                obj_name=name,
+            ))
             obj_result = ObjectiveResult(obj, fem)
             out.update({name: obj_result})
         return out
@@ -492,8 +505,28 @@ class OptimizationDataPerFEM(OptimizationData):
             fem: AbstractFEMInterface,
             hard: bool,
     ) -> TrialConstraintOutput:
+        if len([cns for cns in self.constraints.values() if cns.hard == hard]) > 0:
+            if hard:
+                logger.info(_(
+                    en_message='Evaluating hard constraint functions...',
+                    jp_message='{fem_name} の hard 拘束関数を評価しています...',
+                    fem_name=fem.name,
+                ))
+            else:
+                logger.info(_(
+                    en_message='Evaluating soft constraint functions...',
+                    jp_message='{fem_name} の soft 拘束関数を評価しています...',
+                    fem_name=fem.name,
+
+                ))
+
         for name, cns in self.constraints.items():
             if cns.hard == hard:
+                logger.info(_(
+                    en_message='  Evaluating constraint function {cns_name}...',
+                    jp_message='  制約関数 {cns_name} を評価しています...',
+                    cns_name=name,
+                ))
                 cns_result = ConstraintResult(cns, fem)
                 out.update({name: cns_result})
         return out
@@ -505,6 +538,14 @@ class OptimizationDataPerFEM(OptimizationData):
         return self._c_common(out, self.fem, hard=False)
 
     def _other_outputs_common(self, out: TrialFunctionOutput, fem: AbstractFEMInterface) -> TrialFunctionOutput:
+
+        if len(self.other_outputs) > 0:
+            logger.info(_(
+                en_message='Evaluating other outputs for {fem_name}...',
+                jp_message='{fem_name} のその他の出力を評価しています...',
+                fem_name=fem.name,
+            ))
+
         for name, other_func in self.other_outputs.items():
             other_func_result = FunctionResult(other_func, fem)
             out.update({name: other_func_result})
@@ -520,6 +561,16 @@ class OptimizationDataPerFEM(OptimizationData):
 
 
 class FEMListForGlobal(FEMListInterface):
+
+    @property
+    def name(self) -> str:
+        if len(self._fems) == 1:
+            return self._fems[0].name
+        else:
+            return _(
+                en_message='Entire',
+                jp_message='全体',
+            )
 
     # 単一 FEM しか使わない場合に list を意識させないため
     # 長さ 1 の時は要素を返す処理が方々で必要
@@ -1005,20 +1056,27 @@ class AbstractOptimizer(OptimizationData):
 
                 # ===== Phase 1: update_parameter + hard constraint for ALL contexts =====
                 for ctx in opt_.fem_manager.contexts:
-                    logger.info(_('input variables:'))
-                    logger.info(parameters)
-
                     # ===== update FEM parameter (for hard constraint evaluation) =====
-                    with nullcontext():
+                    if not isinstance(ctx.fem, FEMListForGlobal):
                         pass_to_fem = _get_pass_to_fem(ctx)
-                        logger.info(_('updating variables...'))
+
+                        logger.info(_(
+                            en_message='Updating variables for {fem_name}...',
+                            jp_message='{fem_name} の変数を更新しています...',
+                            fem_name=ctx.fem.name,
+                        ))
+                        logger.info(_(
+                            en_message='  Input: {variables}',
+                            jp_message='  入力: {variables}',
+                            variables=pass_to_fem,
+                        ))
+
                         ctx.fem.update_parameter(pass_to_fem)
                         opt_._check_and_raise_interruption()
 
                     # ===== evaluate hard constraint =====
                     with nullcontext():
                         ctx_hard_c = TrialConstraintOutput()
-                        logger.info(_('evaluating constraint functions...'))
 
                         try:
                             ctx._hard_c(ctx_hard_c)
@@ -1055,13 +1113,17 @@ class AbstractOptimizer(OptimizationData):
                     # ===== update FEM parameter (again, for Femtet parametric compatibility) =====
                     with nullcontext():
                         pass_to_fem = _get_pass_to_fem(ctx)
-                        logger.info(_('updating variables...'))
                         ctx.fem.update_parameter(pass_to_fem)
                         opt_._check_and_raise_interruption()
 
                     # ===== update FEM =====
                     with nullcontext():
-                        logger.info(_('Solving FEM...'))
+                        if not isinstance(ctx.fem, FEMListForGlobal):
+                            logger.info(_(
+                                en_message='Solving {fem_name}...',
+                                jp_message='{fem_name} の解析を実行しています...',
+                                fem_name=ctx.fem.name,
+                            ))
 
                         try:
                             ctx.fem.update()
@@ -1084,8 +1146,6 @@ class AbstractOptimizer(OptimizationData):
 
                     # ===== evaluate y =====
                     with nullcontext():
-                        logger.info(_('evaluating objective functions...'))
-
                         try:
                             ctx_y: TrialOutput = ctx._y()
                             record.y.update(ctx_y)
@@ -1109,7 +1169,6 @@ class AbstractOptimizer(OptimizationData):
                     # ===== evaluate soft constraint =====
                     with nullcontext():
                         ctx_soft_c = TrialConstraintOutput()
-                        logger.info(_('evaluating remaining constraints...'))
 
                         try:
                             ctx._soft_c(ctx_soft_c)
@@ -1129,8 +1188,6 @@ class AbstractOptimizer(OptimizationData):
 
                     # ===== evaluate other functions =====
                     with nullcontext():
-                        logger.info(_('evaluating other functions...'))
-
                         ctx_other_outputs = TrialFunctionOutput()
                         try:
                             ctx._other_outputs(ctx_other_outputs)
@@ -1153,8 +1210,11 @@ class AbstractOptimizer(OptimizationData):
 
                             raise e
 
-                logger.info(_('output:'))
-                logger.info(record.y)
+                logger.info(_(
+                    en_message='Trial finished. Objective values:',
+                    jp_message='トライアルが終了しました。目的関数の値:',
+                ))
+                logger.info(f'  出力: {record.y}')
                 record.state = TrialState.succeeded
 
                 opt_._check_and_raise_interruption()

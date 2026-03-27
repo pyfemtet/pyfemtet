@@ -186,6 +186,17 @@ class FemtetInterface(COMInterface):
     # ===== system =====
 
     @property
+    def name(self) -> str:
+        name = ""
+        if self.femprj_path is not None:
+            name += os.path.basename(self.femprj_path)
+        if self.model_name is not None:
+            name += f' - {self.model_name}'
+        if name == "":
+            name = super().name
+        return name
+
+    @property
     def object_pass_to_fun(self):
         """The object pass to the first argument of user-defined objective functions.
 
