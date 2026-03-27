@@ -985,26 +985,32 @@ class AbstractOptimizer(OptimizationData):
 
                 from contextlib import nullcontext
 
+                def _get_pass_to_fem(ctx__):
+                    # 共通
+                    pass_to_fem__ = self.opt.fem_manager.global_data.variable_manager.get_variables(
+                        filter="pass_to_fem",
+                        format="raw",
+                    )
+                    # FEM ごとのものを追加
+                    pass_to_fem__.update(ctx__.variable_manager.get_variables(
+                        filter="pass_to_fem",
+                        format="raw",
+                    ))
+                    return pass_to_fem__
+
                 # start solve per FEM
                 if opt_.sub_fidelity_name != MAIN_FIDELITY_NAME:
                     logger.info('----------')
                     logger.info(_('fidelity: ({name})', name=opt_.sub_fidelity_name))
+
+                # ===== Phase 1: update_parameter + hard constraint for ALL contexts =====
                 for ctx in opt_.fem_manager.contexts:
                     logger.info(_('input variables:'))
                     logger.info(parameters)
 
-                    # ===== update FEM parameter =====
+                    # ===== update FEM parameter (for hard constraint evaluation) =====
                     with nullcontext():
-                        # 共通
-                        pass_to_fem = self.opt.fem_manager.global_data.variable_manager.get_variables(
-                            filter="pass_to_fem",
-                            format="raw",
-                        )
-                        # FEM ごとのものを追加
-                        pass_to_fem.update(ctx.variable_manager.get_variables(
-                            filter="pass_to_fem",
-                            format="raw",
-                        ))
+                        pass_to_fem = _get_pass_to_fem(ctx)
                         logger.info(_('updating variables...'))
                         ctx.fem.update_parameter(pass_to_fem)
                         opt_._check_and_raise_interruption()
@@ -1042,6 +1048,16 @@ class AbstractOptimizer(OptimizationData):
                                     + ', '.join(violation_names))
 
                             raise HardConstraintViolation
+
+                # ===== Phase 2: FEM execution + objectives + soft constraints + other outputs =====
+                for ctx in opt_.fem_manager.contexts:
+
+                    # ===== update FEM parameter (again, for Femtet parametric compatibility) =====
+                    with nullcontext():
+                        pass_to_fem = _get_pass_to_fem(ctx)
+                        logger.info(_('updating variables...'))
+                        ctx.fem.update_parameter(pass_to_fem)
+                        opt_._check_and_raise_interruption()
 
                     # ===== update FEM =====
                     with nullcontext():
