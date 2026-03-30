@@ -244,6 +244,16 @@ class AbstractFEMInterface:
     def _get_additional_data(self) -> dict:
         return dict()
 
+    # name
+    @property
+    def name(self) -> str:
+        if hasattr(self, '_name'):
+            return self._name
+        return self.__class__.__name__
+
+    @name.setter
+    def name(self, value: str):
+        self._name = value
 
 class COMInterface(AbstractFEMInterface):
 
