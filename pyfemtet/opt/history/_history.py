@@ -965,6 +965,72 @@ class Records:
         self.loaded_meta_columns = loaded_meta_columns
         self.loaded_df = loaded_df
 
+    @staticmethod
+    def _incompatible_setting_detail(
+        category_en: str,
+        category_jp: str,
+        added: set[str],
+        removed: set[str],
+    ) -> str | None:
+        if not added and not removed:
+            return None
+        category = _(en_message=category_en, jp_message=category_jp)
+        lines = []
+        if added:
+            lines.append(
+                _(
+                    en_message="  Extra {category}: {names}",
+                    jp_message="  余分な{category}: {names}",
+                    category=category,
+                    names=", ".join(sorted(added)),
+                )
+            )
+        if removed:
+            lines.append(
+                _(
+                    en_message="  Missing {category}: {names}",
+                    jp_message="  足りない{category}: {names}",
+                    category=category,
+                    names=", ".join(sorted(removed)),
+                )
+            )
+        return "\n".join(lines)
+
+    @staticmethod
+    def _incompatible_setting_message(details: list[str]) -> str:
+        detail = "\n".join(details)
+        return _(
+            en_message="The current script settings do not match "
+            "the history CSV file loaded via history_path.\n"
+            "\n"
+            "[The current setting incompatibilities]\n"
+            "{detail}\n"
+            "\n"
+            "[Countermeasure]\n"
+            "When resuming optimization with history_path, "
+            "the settings must be compatible with the previous run. "
+            "To fix this, choose one of the following options:\n"
+            "  1. Restore the settings to match the previous run.\n"
+            "  2. Remove the history_path argument to start a new optimization.\n"
+            "  3. Delete the history CSV file (and the .db file with the same name, if it exists) "
+            "to discard the previous history and start fresh.",
+            jp_message="現在のスクリプトの設定が、"
+            "history_path で読み込んだ履歴 CSV ファイルの内容と一致しません。\n"
+            "\n"
+            "[現在の設定の不整合点]\n"
+            "{detail}\n"
+            "\n"
+            "[対策]\n"
+            "history_path を指定して最適化を再開する場合、"
+            "設定は前回の実行と整合している必要があります。"
+            "以下のいずれかの方法で対処してください:\n"
+            "  1. 前回の実行と同じ設定に戻す。\n"
+            "  2. history_path の指定を削除して新しい最適化を開始する。\n"
+            "  3. 履歴 CSV ファイル（および同名の .db ファイルがあればそれも）を削除し、"
+            "前回の履歴を破棄して最初からやり直す。",
+            detail=detail,
+        )
+
     def check_problem_compatibility(self):
         # 読み込んだデータがないのであれば何もしない
         if self.loaded_df is None:
@@ -978,6 +1044,8 @@ class Records:
             self.loaded_meta_columns,
         )
 
+        incompatible_details: list[str] = []
+
         # prm_names が過不足ないか
         loaded_prm_names = set(
             self.column_manager._filter_prm_names(loaded_columns, loaded_meta_columns)
@@ -986,7 +1054,13 @@ class Records:
         if not (
             len(loaded_prm_names - prm_names) == len(prm_names - loaded_prm_names) == 0
         ):
-            raise RuntimeError("Incompatible parameter setting.")
+            detail = self._incompatible_setting_detail(
+                "parameter", "パラメータ",
+                added=prm_names - loaded_prm_names,
+                removed=loaded_prm_names - prm_names,
+            )
+            if detail:
+                incompatible_details.append(detail)
 
         # obj_names が増えていないか
         loaded_obj_names = set(
@@ -996,7 +1070,13 @@ class Records:
         )
         obj_names = set(self.column_manager.get_obj_names())
         if len(obj_names - loaded_obj_names) > 0:
-            raise RuntimeError("Incompatible objective setting.")
+            detail = self._incompatible_setting_detail(
+                "objective", "目的関数",
+                added=obj_names - loaded_obj_names,
+                removed=set(),
+            )
+            if detail:
+                incompatible_details.append(detail)
 
         # cns_names が過不足ないか
         # TODO: cns の上下限は変更されてはならない。
@@ -1009,7 +1089,18 @@ class Records:
         if not (
             len(loaded_cns_names - cns_names) == len(cns_names - loaded_cns_names) == 0
         ):
-            raise RuntimeError("Incompatible constraint setting.")
+            detail = self._incompatible_setting_detail(
+                "constraint", "拘束条件",
+                added=cns_names - loaded_cns_names,
+                removed=loaded_cns_names - cns_names,
+            )
+            if detail:
+                incompatible_details.append(detail)
+
+        if incompatible_details:
+            raise RuntimeError(
+                self._incompatible_setting_message(incompatible_details)
+            )
 
     def reinitialize_record_with_loaded_data(
         self, column_order_mode: str = ColumnOrderMode.per_category
