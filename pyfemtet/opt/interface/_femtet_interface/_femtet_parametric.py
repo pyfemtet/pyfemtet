@@ -243,7 +243,7 @@ def _parametric_objective(Femtet, parametric_result_index):
     return dll.GetPrmResult(parametric_result_index)
 
 
-def solve_via_parametric_dll(Femtet) -> bool:
+def solve_via_parametric_dll(Femtet, clear_sweep_table: bool = True) -> bool:
     csv_processor = get_csv_processor(Femtet)
 
     # remove previous csv if exists
@@ -255,11 +255,12 @@ def solve_via_parametric_dll(Femtet) -> bool:
     dll = _get_dll_with_set_femtet(Femtet)
 
     # reset existing sweep table
-    dll.ClearPrmSweepTable.restype = ctypes.c_bool
-    succeed = dll.ClearPrmSweepTable()
-    if not succeed:
-        logger.error('Failed to remove existing sweep table!')  # 通常ありえないので error
-        return False
+    if clear_sweep_table:
+        dll.ClearPrmSweepTable.restype = ctypes.c_bool
+        succeed = dll.ClearPrmSweepTable()
+        if not succeed:
+            logger.error('Failed to remove existing sweep table!')  # 通常ありえないので error
+            return False
 
     # solve
     dll.PrmCalcExecute.restype = ctypes.c_bool

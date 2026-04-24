@@ -174,6 +174,7 @@ class FemtetInterface(COMInterface):
         self._warn_if_undefined_variable = True
         self.api_response_warning_time = 10  # mesh, solve, re-execute を除くマクロ実行警告時間
         self.save_screenshot: Literal["result", "model", "none"] = "model"
+        self._clear_parametric_sweep_table: bool = True
 
         # connect to Femtet
         self._connect_and_open_femtet()
@@ -1011,7 +1012,7 @@ class FemtetInterface(COMInterface):
                 if_error=SolveError,
                 error_message=Msg.ERR_PARAMETRIC_SOLVE_FAILED,
                 is_Gaudi_method=True,
-                args=(self.Femtet,),
+                args=(self.Femtet, self._clear_parametric_sweep_table),
             )
 
             # parametric analysis の場合
