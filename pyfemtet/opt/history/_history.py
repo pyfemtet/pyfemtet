@@ -372,20 +372,20 @@ class ColumnManager:
     column_dtypes: dict[str, type]
     meta_columns: list[str]
 
-    def columns_to_keep_even_if_nan(self) -> set[str]:
-        out = {"messages"}
+    def columns_to_keep_even_if_nan(self) -> list[str]:
+        out = ["messages"]
         # objective
         for name in self.get_obj_names():
-            out.add(name)
-            out.add(CorrespondingColumnNameRuler.direction_name(name))
+            out.append(name)
+            out.append(CorrespondingColumnNameRuler.direction_name(name))
         # constraint
         for name in self.get_cns_names():
-            out.add(name)
-            out.add(CorrespondingColumnNameRuler.cns_lower_bound_name(name))
-            out.add(CorrespondingColumnNameRuler.cns_upper_bound_name(name))
+            out.append(name)
+            out.append(CorrespondingColumnNameRuler.cns_lower_bound_name(name))
+            out.append(CorrespondingColumnNameRuler.cns_upper_bound_name(name))
         # other_output
         for name in self.get_other_output_names():
-            out.add(name)
+            out.append(name)
         return out
 
     def initialize(
@@ -1227,7 +1227,7 @@ class Records:
         self.df_wrapper.set_df(df)
 
     def remove_nan_columns(
-        self, df, meta_columns, columns_to_keep: set[str] | None = None
+        self, df, meta_columns, columns_to_keep: list[str] | None = None
     ) -> tuple[pd.DataFrame, tuple[str]]:
         """
 
