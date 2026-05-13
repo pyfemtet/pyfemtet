@@ -3,7 +3,7 @@ from packaging.version import Version
 from threading import Lock as _ThreadingLock
 
 import dask
-from dask.distributed import LocalCluster, Client, Lock as _DaskLock, Nanny
+from dask.distributed import LocalCluster, Client, Lock as _DaskLock, Nanny, Worker
 from dask.distributed import get_client as _get_client, get_worker as _get_worker
 from dask import config as cfg
 
@@ -41,21 +41,21 @@ __all__ = [
 _lock_pool = {}
 
 
-def get_client(scheduler_address=None):
+def get_client(scheduler_address=None) -> Client | None:
     try:
         return _get_client(scheduler_address)
     except ValueError:
         return None
 
 
-def get_worker():
+def get_worker() -> Worker | None:
     try:
         return _get_worker()
     except ValueError:
         return None
 
 
-def Lock(name, client=None):
+def Lock(name, client=None) -> _DaskLock | _ThreadingLock:
     global _lock_pool
 
     if client is None:

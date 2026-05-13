@@ -53,7 +53,7 @@ logger = get_module_logger("opt.history", False)
 logger_dask = get_module_logger("opt.dask", False)
 
 
-def get_trial_name(trial=None, fidelity=None, sub_sampling=None, row: pd.Series = None):
+def get_trial_name(trial=None, fidelity=None, sub_sampling=None, row: pd.Series | None = None):
     if row is not None:
         assert not math.isnan(row["trial"])
         trial = row["trial"]
@@ -188,7 +188,7 @@ class DataFrameWrapper:
     def lock(self):
         return Lock(self._lock_name)
 
-    def get_df(self, equality_filters: dict = None) -> pd.DataFrame:
+    def get_df(self, equality_filters: dict | None = None) -> pd.DataFrame:
         """
 
         Args:
@@ -240,7 +240,7 @@ class DataFrameWrapper:
 
         return df
 
-    def set_df(self, df, equality_filters: dict = None):
+    def set_df(self, df, equality_filters: dict | None = None):
         """
 
         Args:
@@ -1227,7 +1227,7 @@ class Records:
         self.df_wrapper.set_df(df)
 
     def remove_nan_columns(
-        self, df, meta_columns, columns_to_keep: list[str] | None = None
+        self, df: pd.DataFrame, meta_columns: list[str], columns_to_keep: list[str] | None = None
     ) -> tuple[pd.DataFrame, tuple[str]]:
         """
 
@@ -1506,7 +1506,7 @@ class History:
 
         self._finalized = True
 
-    def get_df(self, equality_filters: dict = None) -> pd.DataFrame:
+    def get_df(self, equality_filters: dict | None = None) -> pd.DataFrame:
         """Returns the optimization history.
 
         Args:
