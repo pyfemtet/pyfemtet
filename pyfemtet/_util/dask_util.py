@@ -55,7 +55,7 @@ def get_worker() -> Worker | None:
         return None
 
 
-def Lock(name, client=None) -> _DaskLock | _ThreadingLock:
+def Lock(name, client=None):
     global _lock_pool
 
     if client is None:
