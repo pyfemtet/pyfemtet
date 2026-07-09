@@ -135,6 +135,7 @@ class FemtetInterface(COMInterface):
             always_open_copy=False,
             # ユーザーはメソッドを使うことを推奨。GUI などで使用。
             parametric_output_indexes_use_as_objective: dict[int, str | float] | None = None,
+            skip_model_update: bool = False,
     ):
         if parametric_output_indexes_use_as_objective is not None:
             if FemtetInterface._show_parametric_index_warning:
@@ -158,6 +159,7 @@ class FemtetInterface(COMInterface):
         self.open_result_with_gui = open_result_with_gui
         self.save_pdt = save_pdt
         self._always_open_copy = always_open_copy
+        self.skip_model_update = skip_model_update
 
         # その他のメンバーの宣言や初期化
         self.Femtet = None
@@ -965,23 +967,24 @@ class FemtetInterface(COMInterface):
     def update_model(self) -> None:
         """Updates the analysis model only."""
 
-        # 設計変数に従ってモデルを再構築
-        self._call_femtet_api(
-            "self.Femtet.Gaudi.ReExecute",
-            False,
-            ModelError,  # 生きてるのに失敗した場合
-            error_message=Msg.ERR_RE_EXECUTE_MODEL_FAILED,
-            is_Gaudi_method=True,
-        )
+        if not self.skip_model_update:
+            # 設計変数に従ってモデルを再構築
+            self._call_femtet_api(
+                "self.Femtet.Gaudi.ReExecute",
+                False,
+                ModelError,  # 生きてるのに失敗した場合
+                error_message=Msg.ERR_RE_EXECUTE_MODEL_FAILED,
+                is_Gaudi_method=True,
+            )
 
-        # 処理を確定
-        self._call_femtet_api(
-            self.Femtet.Redraw,
-            False,  # 戻り値は常に None なのでこの変数に意味はなく None 以外なら何でもいい
-            ModelError,  # 生きてるのに失敗した場合
-            error_message=Msg.ERR_MODEL_REDRAW_FAILED,
-            is_Gaudi_method=True,
-        )
+            # 処理を確定
+            self._call_femtet_api(
+                self.Femtet.Redraw,
+                False,  # 戻り値は常に None なのでこの変数に意味はなく None 以外なら何でもいい
+                ModelError,  # 生きてるのに失敗した場合
+                error_message=Msg.ERR_MODEL_REDRAW_FAILED,
+                is_Gaudi_method=True,
+            )
 
     @with_reopen
     def solve(self) -> None:
