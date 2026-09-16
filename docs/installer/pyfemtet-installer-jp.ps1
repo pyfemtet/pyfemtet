@@ -179,11 +179,12 @@ $pyfemtet_opt_script_builder_path = $pyfemtet_package_path.replace("Lib\site-pac
 $pyfemtet_opt_result_viewer_path = $pyfemtet_package_path.replace("Lib\site-packages\pyfemtet\__init__.py", "Scripts\pyfemtet-opt-result-viewer.exe")
 
 $succeed = (test-path $pyfemtet_opt_script_builder_path) -and (test-path $pyfemtet_opt_result_viewer_path)
+$common_desktop = [Environment]::GetFolderPath([Environment+SpecialFolder]::CommonDesktopDirectory)
 
 if ($succeed) {
     # create desktop shortcut of pyfemtet-opt.exe in $Scripts_dir folder
     try {
-        $Shortcut_file = "$env:USERPROFILE\Desktop\pyfemtet-opt.lnk"
+        $Shortcut_file = Join-Path $common_desktop "pyfemtet-opt.lnk"
         $WScriptShell = New-Object -ComObject WScript.Shell
         $Shortcut = $WScriptShell.CreateShortcut($Shortcut_file)
         $Shortcut.TargetPath = $pyfemtet_opt_script_builder_path
@@ -194,7 +195,7 @@ if ($succeed) {
         $succeed = $false
     }
     try {
-        $Shortcut_file = "$env:USERPROFILE\Desktop\pyfemtet-opt-result-viewer.lnk"
+        $Shortcut_file = Join-Path $common_desktop "pyfemtet-opt-result-viewer.lnk"
         $WScriptShell = New-Object -ComObject WScript.Shell
         $Shortcut = $WScriptShell.CreateShortcut($Shortcut_file)
         $Shortcut.TargetPath = $pyfemtet_opt_result_viewer_path

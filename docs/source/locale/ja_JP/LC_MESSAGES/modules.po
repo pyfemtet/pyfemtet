@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-27 14:41+0900\n"
+"POT-Creation-Date: 2026-09-16 10:58+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.17.0\n"
+"Generated-By: Babel 2.18.0\n"
 
 #: ../source/modules/modules.rst:2
 msgid "pyfemtet"
@@ -421,10 +421,6 @@ msgstr "ホスト名が指定されていない場合、モニタサーバーは
 #: of pyfemtet.opt.femopt.FEMOpt.set_monitor_host:18
 msgid "We can access process monitor by accessing ```localhost:8080``` on our browser by default."
 msgstr "デフォルトでは、ブラウザで ```localhost:8080``` にアクセスすることでプロセスモニターにアクセスできます。"
-
-#: of pyfemtet.opt.femopt.substrate_size:1
-msgid "基板のXY平面上での専有面積を計算します。"
-msgstr "Calculates the occupied area on the substrate's XY plane."
 
 #: ../source/modules/pyfemtet.opt.rst:38
 msgid "pyfemtet.opt.worker\\_status module"
@@ -970,10 +966,6 @@ msgstr "最適化履歴をエクスポートします。"
 #: of pyfemtet.opt.history._history.History.save:3
 msgid "The destination path is :class:`History.path`."
 msgstr "保存先パスは :class:`History.path` です。"
-
-#: of pyfemtet.opt.history._history.TrialState:1
-msgid "An enumeration."
-msgstr ""
 
 #: ../source/modules/pyfemtet.opt.interface.rst:2
 msgid "pyfemtet.opt.interface package"
@@ -2118,4 +2110,7 @@ msgstr "pyfemtet.opt.visualization.plotter.pm\\_graph\\_creator module"
 
 #~ msgid "Bases: :py:class:`~pyfemtet.opt.optimizer._base_optimizer.OptimizationDataStore`"
 #~ msgstr "Bases: :py:class:`~pyfemtet.opt.optimizer._base_optimizer.AbstractOptimizer`"
+
+#~ msgid "基板のXY平面上での専有面積を計算します。"
+#~ msgstr "Calculates the occupied area on the substrate's XY plane."
 

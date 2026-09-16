@@ -93,28 +93,44 @@
              
   <section id="install-python">
 <h1>Install Python<a class="headerlink" href="#install-python" title="Link to this heading"></a></h1>
-<p>Download the installer for windows 64-bit and run it.</p>
+<p>Download the Windows 64-bit installer for a supported Python version
+(3.10 to 3.14) and run it.</p>
+<p>For a shared PC, install Python for all users so that the <code class="docutils literal notranslate"><span class="pre">py</span></code> command is
+available when the PyFemtet setup script is run with administrator privileges.</p>
 <p><a href="https://www.python.org/" target="_blank">python.org</a></p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>To download a version of Python that is not the latest,
-refer to the screenshot below and download the installer that suits your environment.</p>
-</div>
-<figure class="align-default">
-<img alt="../../_images/python_download.png" src="../../_images/python_download.png" />
-</figure>
 <figure class="align-default" id="id1">
-<a class="reference internal image-reference" href="../../_images/python_3.11.png"><img alt="../../_images/python_3.11.png" src="../../_images/python_3.11.png" style="width: 297.5px; height: 404.0px;" /></a>
+<img alt="../../_images/get-python-installer.png" src="../../_images/get-python-installer.png" />
 <figcaption>
-<p><span class="caption-text">This screenshot shows an example of the location of the link to the installer for Python 3.11.7 for 64-bit Windows.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+<p><span class="caption-text">Open the <strong>Downloads</strong> menu and select <strong>Windows</strong>. Download the
+installer for the required Python version.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
 </figcaption>
 </figure>
-<figure class="align-default" id="id2">
-<img alt="../../_images/python_install.png" src="../../_images/python_install.png" />
-<figcaption>
-<p><span class="caption-text">Installer screen.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
-</figcaption>
+<ol class="arabic">
+<li><p>In the first installer window, select <strong>Customize installation</strong>.</p>
+<blockquote>
+<div><figure class="align-default">
+<img alt="../../_images/python-customize-installation.png" src="../../_images/python-customize-installation.png" />
 </figure>
+</div></blockquote>
+</li>
+<li><p>On the <strong>Optional Features</strong> screen, ensure that <strong>py launcher</strong> is
+selected. Select <strong>for all users (requires admin privileges)</strong>, then
+select <strong>Next</strong>.</p>
+<blockquote>
+<div><figure class="align-default">
+<img alt="../../_images/python-install-py-launcher-for-all-users.png" src="../../_images/python-install-py-launcher-for-all-users.png" />
+</figure>
+</div></blockquote>
+</li>
+<li><p>On the <strong>Advanced Options</strong> screen, select <strong>Install Python &lt;version&gt;
+for all users</strong>, then select <strong>Install</strong>.</p>
+<blockquote>
+<div><figure class="align-default">
+<img alt="../../_images/python-install-for-all-users.png" src="../../_images/python-install-for-all-users.png" />
+</figure>
+</div></blockquote>
+</li>
+</ol>
 <section id="check-the-installation-of-python">
 <span id="check-the-installation-python-section"></span><h2>Check the Installation of Python<a class="headerlink" href="#check-the-installation-of-python" title="Link to this heading"></a></h2>
 <p>If you want to check the installation later, please follow the steps below.</p>
@@ -126,12 +142,12 @@ refer to the screenshot below and download the installer that suits your environ
 </figure>
 </div></blockquote>
 </li>
-<li><p>Type <code class="docutils literal notranslate"><span class="pre">py</span></code> and press Enter.</p></li>
-<li><p>If Python starts, the setup was successful.
-(If you see the message
-“‘py’ is not recognized as an internal or external command,
-operable program or batch file.”,
-it is possible that Python is not installed.)</p>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">py</span> <span class="pre">--version</span></code>.</p></li>
+<li><p>Confirm that a supported Python version (3.10 to 3.14) is displayed.</p>
+<p>If no version is displayed, run the command from a Command Prompt with
+administrator privileges and confirm that Python was installed for all users.
+If you see the message <code class="docutils literal notranslate"><span class="pre">'py'</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">recognized</span> <span class="pre">as</span> <span class="pre">an</span> <span class="pre">internal</span> <span class="pre">or</span> <span class="pre">external</span>
+<span class="pre">command,</span> <span class="pre">operable</span> <span class="pre">program</span> <span class="pre">or</span> <span class="pre">batch</span> <span class="pre">file.</span></code>, Python may not be installed.</p>
 <blockquote>
 <div><figure class="align-default">
 <img alt="../../_images/py_installed.png" src="../../_images/py_installed.png" />

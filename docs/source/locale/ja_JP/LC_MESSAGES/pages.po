@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PyFemtet Project \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-27 14:41+0900\n"
+"POT-Creation-Date: 2026-09-16 10:58+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.17.0\n"
+"Generated-By: Babel 2.18.0\n"
 
 # no-translate
 #: ../source/pages/LICENSE.rst:2
@@ -420,62 +420,66 @@ msgstr "Windows キーを押して ``cmd`` と入力します。"
 msgid "Select **Run as administrator** for Command Prompt."
 msgstr "コマンド プロンプトの **管理者として実行** を選択します。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:29
+#: ../source/pages/installation_pages/install_pyfemtet.rst:27
 msgid "Run the following command. ::"
 msgstr "次のコマンドを実行します。::"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:36
+#: ../source/pages/installation_pages/install_pyfemtet.rst:34
 msgid "Replace ``<path/to/your/downloaded/.ps1>`` with the path to the ``pyfemtet-installer.ps1`` file that you downloaded. You can obtain the path by **Shift+right-clicking** the file and selecting \"Copy as path\"."
 msgstr "``<path/to/your/downloaded/.ps1>`` を、ダウンロードした ``pyfemtet-installer.ps1`` ファイルのパスに置き換えてください。対象ファイルを **Shift キーを押しながら右クリック** し、「パスとしてコピー」を選択すると、パスを取得できます。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:35
+#: ../source/pages/installation_pages/install_pyfemtet.rst:41
 msgid "***Security Warnings***"
 msgstr "***セキュリティに関する警告***"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:44
+#: ../source/pages/installation_pages/install_pyfemtet.rst:43
 msgid "This command temporarily relaxes the execution policy for running a PowerShell script. Before executing this command, make sure that the specified .ps1 file is the file downloaded from the link above."
 msgstr "このコマンドは、PowerShell スクリプトを実行するための実行ポリシーを一時的に緩和します。このコマンドを実行する前に、指定した .ps1 ファイルが上記のリンクからダウンロードしたファイルであることを確認してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:52
+#: ../source/pages/installation_pages/install_pyfemtet.rst:50
 msgid "This script assumes that your Python installation includes the ``py`` launcher. If you have done a custom installation of Python, **make sure that your installation configuration includes the ``py`` launcher.**"
 msgstr "このスクリプトは Python のインストール構成に ``py`` ランチャーが含まれていることを前提としています。Python をカスタムインストールした場合は、**インストール構成に ``py`` ランチャーが含まれていることを確認してください。**"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:59
+#: ../source/pages/installation_pages/install_pyfemtet.rst:57
 msgid "If you want to install pyfemtet in a virtual environment, or do not have the ``py`` launcher, change the ``$python_command`` assignment in the script to the following. Then activate the virtual environment and run the script from the command line: ::"
 msgstr "仮想環境に pyfemtet をインストールする場合、または ``py`` ランチャーがない場合は、スクリプト内の ``$python_command`` の代入を次のように変更してください。その後、仮想環境を有効化して、コマンドラインからスクリプトを実行してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:78
-msgid "Type ``py -m pip show pyfemtet`` and press Enter. (``py -m pip show pyfemtet-opt-gui`` for the GUI tool)"
-msgstr "``py -m pip show pyfemtet`` と入力して Enter キーを押します。GUI ツールの場合は、``py -m pip show pyfemtet-opt-gui`` と入力します。"
+#: ../source/pages/installation_pages/install_pyfemtet.rst:68
+msgid "Check the Installation of PyFemtet"
+msgstr "PyFemtet がインストールできているか確認する"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:63
-#: ../source/pages/installation_pages/install_python.rst:39
+#: ../source/pages/installation_pages/install_pyfemtet.rst:70
+#: ../source/pages/installation_pages/install_python.rst:43
 msgid "If you want to check the installation later, please follow the steps below."
 msgstr "インストールを後から確認したい場合は、以下の手順に従ってください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:65
-#: ../source/pages/installation_pages/install_python.rst:41
+#: ../source/pages/installation_pages/install_pyfemtet.rst:72
+#: ../source/pages/installation_pages/install_python.rst:45
 msgid "Press the Windows key and open the Command Prompt."
 msgstr "Windows キーを押してコマンドプロンプトを開きます。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:69
-msgid "Type ``py -m pip show pyfemtet`` and press Enter. (``py -m pip show pyfemtet-opt-gui`` for GUI tool)"
-msgstr "「py -m pip show pyfemtet」と入力して Enter キーを押してください。（GUI ツールの場合は「py -m pip show pyfemtet-opt-gui」）"
+#: ../source/pages/installation_pages/install_pyfemtet.rst:77
+msgid "Type ``py -m pip show pyfemtet`` and press Enter."
+msgstr "``py -m pip show pyfemtet`` と入力して Enter キーを押してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:72
-msgid "If you get the following result, the setup was successful. ( If you see the message ``'py' is not recognized as an internal or external command, operable program or batch file.``, Python is not installed."
-msgstr "以下の結果が表示されれば、セットアップは成功しています。（ ``'py' は、内部コマンドまたは外部コマンド、操作可能なプログラムまたはバッチ ファイルとして認識されていません。`` というメッセージが表示された場合は、Python がインストールされていません。）"
+#: ../source/pages/installation_pages/install_pyfemtet.rst:77
+msgid "(``py -m pip show pyfemtet-opt-gui`` for the GUI tool)"
+msgstr "（GUI ツールの場合は ``py -m pip show pyfemtet-opt-gui``）"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:78
+#: ../source/pages/installation_pages/install_pyfemtet.rst:79
+msgid "If the following information is displayed, the setup was successful. ( If you see the message ``'py' is not recognized as an internal or external command, operable program or batch file.``, Python is not installed."
+msgstr "次の情報が表示されれば、セットアップは成功です。（``'py' は内部コマンドまたは外部コマンド、操作可能なプログラムまたはバッチ ファイルとして認識されていません。`` というメッセージが表示された場合は、Python がインストールされていません。"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:85
 msgid "If you see the message ``WARNING: Package(s) not found: pyfemtet`` (or ``pyfemtet-opt-gui``), PyFemtet (or its GUI tool) is not installed. )"
 msgstr "``WARNING: Package(s) not found: pyfemtet`` （または ``pyfemtet-opt-gui`` ）というメッセージが表示された場合、PyFemtet（またはその GUI ツール）がインストールされていません。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:86
+#: ../source/pages/installation_pages/install_pyfemtet.rst:93
 #: ../source/pages/script_builder.rst:49
 msgid "Manual Installation"
 msgstr "手動インストール"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:88
+#: ../source/pages/installation_pages/install_pyfemtet.rst:95
 msgid "If this step fails, try the following steps manually:"
 msgstr "この手順が失敗した場合は、次の手順を手動で試してください。"
 
@@ -545,37 +549,49 @@ msgid "Install Python"
 msgstr "Python のインストール"
 
 #: ../source/pages/installation_pages/install_python.rst:9
-msgid "Download the installer for windows 64-bit and run it."
-msgstr "64-bit 版 windows 用インストーラをダウンロードして実行します。"
+msgid "Download the Windows 64-bit installer for a supported Python version (3.10 to 3.14) and run it."
+msgstr "サポート対象の Python バージョン（3.10 から 3.14）の Windows 64-bit 用インストーラをダウンロードして実行します。"
+
+#: ../source/pages/installation_pages/install_python.rst:12
+msgid "For a shared PC, install Python for all users so that the ``py`` command is available when the PyFemtet setup script is run with administrator privileges."
+msgstr "共有 PC では、管理者権限で PyFemtet セットアップスクリプトを実行したときに ``py`` コマンドを使用できるよう、Python を全ユーザー向けにインストールしてください。"
 
 # no-translate
-#: ../source/pages/installation_pages/install_python.rst:11
+#: ../source/pages/installation_pages/install_python.rst:15
 msgid "|Python|"
 msgstr ""
 
-#: ../source/pages/installation_pages/install_python.rst:16
-msgid "To download a version of Python that is not the latest, refer to the screenshot below and download the installer that suits your environment."
-msgstr "最新ではないバージョンの Python をダウンロードする場合は、以下のスクリーンショットを参照して、環境に適したインストーラーをダウンロードしてください。"
+#: ../source/pages/installation_pages/install_python.rst:19
+msgid "Open the **Downloads** menu and select **Windows**. Download the installer for the required Python version."
+msgstr "**Downloads** メニューを開き、**Windows** を選択します。必要な Python バージョンのインストーラをダウンロードしてください。"
+
+#: ../source/pages/installation_pages/install_python.rst:22
+msgid "In the first installer window, select **Customize installation**."
+msgstr "最初のインストーラ画面で **Customize installation** を選択します。"
 
 #: ../source/pages/installation_pages/install_python.rst:26
-msgid "This screenshot shows an example of the location of the link to the installer for Python 3.11.7 for 64-bit Windows."
-msgstr "このスクリーンショットは、64 ビット Windows 用の Python 3.11.7 インストーラーへのリンクの場所の例を示しています。"
+msgid "On the **Optional Features** screen, ensure that **py launcher** is selected. Select **for all users (requires admin privileges)**, then select **Next**."
+msgstr "**Optional Features** 画面で、**py launcher** が選択されていることを確認します。**for all users (requires admin privileges)** を選択し、**Next** を選択します。"
 
-#: ../source/pages/installation_pages/install_python.rst:31
-msgid "Installer screen."
-msgstr "インストーラ画面"
+#: ../source/pages/installation_pages/install_python.rst:32
+msgid "On the **Advanced Options** screen, select **Install Python <version> for all users**, then select **Install**."
+msgstr "**Advanced Options** 画面で、**Install Python <version> for all users** を選択し、**Install** を選択します。"
 
-#: ../source/pages/installation_pages/install_python.rst:37
+#: ../source/pages/installation_pages/install_python.rst:41
 msgid "Check the Installation of Python"
 msgstr "Python がインストールできているか確認する"
 
-#: ../source/pages/installation_pages/install_python.rst:45
-msgid "Type ``py`` and press Enter."
-msgstr "「py」と入力して Enter キーを押してください。"
+#: ../source/pages/installation_pages/install_python.rst:49
+msgid "Run ``py --version``."
+msgstr "``py --version`` を実行します。"
 
-#: ../source/pages/installation_pages/install_python.rst:47
-msgid "If Python starts, the setup was successful. (If you see the message \"'py' is not recognized as an internal or external command, operable program or batch file.\", it is possible that Python is not installed.)"
-msgstr "Python が起動すればセットアップは成功です。 (もし 「”py” は内部コマンドまたは外部コマンド、操作可能なプログラムまたはバッチ ファイルとして認識されていません。」というメッセージが表示される場合、Python がインストールされていない可能性があります。)"
+#: ../source/pages/installation_pages/install_python.rst:51
+msgid "Confirm that a supported Python version (3.10 to 3.14) is displayed."
+msgstr "サポート対象の Python バージョン（3.10 から 3.14）が表示されることを確認します。"
+
+#: ../source/pages/installation_pages/install_python.rst:53
+msgid "If no version is displayed, run the command from a Command Prompt with administrator privileges and confirm that Python was installed for all users. If you see the message ``'py' is not recognized as an internal or external command, operable program or batch file.``, Python may not be installed."
+msgstr "バージョンが表示されない場合は、管理者権限でコマンドプロンプトを開いてコマンドを実行し、Python が全ユーザー向けにインストールされていることを確認してください。``'py' は内部コマンドまたは外部コマンド、操作可能なプログラムまたはバッチ ファイルとして認識されていません。`` というメッセージが表示される場合は、Python がインストールされていない可能性があります。"
 
 #: ../source/pages/installation_pages/setup_com_constants.rst:2
 msgid "Manually Set COM Constants"
@@ -1296,4 +1312,22 @@ msgstr "ツールの `チュートリアルモード` によってサンプル�
 # no-translate
 #~ msgid "Copyright 2025 Kazuma NAITO"
 #~ msgstr ""
+
+#~ msgid "Type ``py -m pip show pyfemtet`` and press Enter. (``py -m pip show pyfemtet-opt-gui`` for GUI tool)"
+#~ msgstr "「py -m pip show pyfemtet」と入力して Enter キーを押してください。（GUI ツールの場合は「py -m pip show pyfemtet-opt-gui」）"
+
+#~ msgid "Download the installer for windows 64-bit and run it."
+#~ msgstr "64-bit 版 windows 用インストーラをダウンロードして実行します。"
+
+#~ msgid "To download a version of Python that is not the latest, refer to the screenshot below and download the installer that suits your environment."
+#~ msgstr "最新ではないバージョンの Python をダウンロードする場合は、以下のスクリーンショットを参照して、環境に適したインストーラーをダウンロードしてください。"
+
+#~ msgid "This screenshot shows an example of the location of the link to the installer for Python 3.11.7 for 64-bit Windows."
+#~ msgstr "このスクリーンショットは、64 ビット Windows 用の Python 3.11.7 インストーラーへのリンクの場所の例を示しています。"
+
+#~ msgid "Installer screen."
+#~ msgstr "インストーラ画面"
+
+#~ msgid "If Python starts, the setup was successful. (If you see the message \"'py' is not recognized as an internal or external command, operable program or batch file.\", it is possible that Python is not installed.)"
+#~ msgstr "Python が起動すればセットアップは成功です。 (もし 「”py” は内部コマンドまたは外部コマンド、操作可能なプログラムまたはバッチ ファイルとして認識されていません。」というメッセージが表示される場合、Python がインストールされていない可能性があります。)"
 
