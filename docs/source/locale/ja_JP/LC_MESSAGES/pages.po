@@ -387,8 +387,8 @@ msgid "Install PyFemtet"
 msgstr "PyFemtet のインストール"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:4
-msgid "This page shows how to install/update ``pyfemtet``. The both are the same procedure."
-msgstr "このページでは ``pyfemtet`` のインストール／アップデート方法を紹介します。どちらも同じ手順です。"
+msgid "This page explains how to install or update ``pyfemtet``. Both operations use the same procedure."
+msgstr "このページでは ``pyfemtet`` のインストールまたはアップデートの方法を説明します。どちらも同じ手順です。"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:7
 #: ../source/pages/installation_pages/setup_femtet_macro.rst:4
@@ -397,7 +397,7 @@ msgstr "この手順には管理者権限が必要です。"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:11
 msgid "This procedure requires Python 3.10 ~ 3.14. If you are installing PyFemtet on a different version of Python, follow the manual instructions at the end of this page."
-msgstr "この手順には Python 3.11、3.12、または 3.14 が必要です。これ以外のバージョンの Python に PyFemtet をインストールする場合は、このページの末尾に記載の手動手順に従ってください。"
+msgstr "この手順には Python 3.10 から 3.14 が必要です。これ以外のバージョンの Python に PyFemtet をインストールする場合は、このページの末尾に記載の手動手順に従ってください。"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:16
 msgid "Please download the following file."
@@ -409,32 +409,44 @@ msgid ":download:`pyfemtet-installer.ps1 <../../pyfemtet-installer.ps1>`"
 msgstr ""
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:20
-msgid "Run the following command on **administrative** ``Command Prompt``. ::"
-msgstr "**管理者権限** のコマンドプロンプトを開き、下記コマンドを実行してください。"
+msgid "Open ``Command Prompt`` with administrator privileges."
+msgstr "``コマンド プロンプト`` を管理者権限で開きます。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:27
-msgid "Please don't forget to replace ``<path/to/your/downloaded/.ps1>`` to the path of the ``pyfemtet-installer.ps1`` file you downloaded. You can acquire the path by **Shift+Right-clicking** the file and select \"Copy as a path\"."
-msgstr "``pyfemtet-installer.ps1`` ファイルのパスは、必ず ``<path/to/your/downloaded/.ps1>`` の部分にダウンロードしたファイルのパスに置き換えてください。パスは、対象ファイルを **Shift キーを押しながら右クリック** し、「パスとしてコピー」を選択すると取得できます。"
+#: ../source/pages/installation_pages/install_pyfemtet.rst:22
+msgid "Press the Windows key and type ``cmd``."
+msgstr "Windows キーを押して ``cmd`` と入力します。"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:23
+msgid "Select **Run as administrator** for Command Prompt."
+msgstr "コマンド プロンプトの **管理者として実行** を選択します。"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:29
+msgid "Run the following command. ::"
+msgstr "次のコマンドを実行します。::"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:36
+msgid "Replace ``<path/to/your/downloaded/.ps1>`` with the path to the ``pyfemtet-installer.ps1`` file that you downloaded. You can obtain the path by **Shift+right-clicking** the file and selecting \"Copy as path\"."
+msgstr "``<path/to/your/downloaded/.ps1>`` を、ダウンロードした ``pyfemtet-installer.ps1`` ファイルのパスに置き換えてください。対象ファイルを **Shift キーを押しながら右クリック** し、「パスとしてコピー」を選択すると、パスを取得できます。"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:35
 msgid "***Security Warnings***"
 msgstr "***セキュリティに関する警告***"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:37
-msgid "This command temporarily relaxes the security requirements to run powershell script. Before executing this command, please ensure that the .ps1 file you specifying is the one downloaded from the above source."
-msgstr "このコマンドは一時的にセキュリティを緩和して powershell スクリプトを実行します。このコマンドを実行する前に、コマンドで指定した .ps1 ファイルがこのページからダウンロードしたファイルであることを確認してください。"
-
 #: ../source/pages/installation_pages/install_pyfemtet.rst:44
-msgid "This script assumes that your Python installation includes `py launcher`. If you have done a custom installation of Python, **make sure that your installation configuration includes the py launcher.**"
-msgstr "このスクリプトは Python のインストール構成に `py launcher` が含まれていることを前提としています。Python のカスタムインストールを行った場合は、 **そのインストール構成に `py launcher` が含まれていることを確認してください。**"
+msgid "This command temporarily relaxes the execution policy for running a PowerShell script. Before executing this command, make sure that the specified .ps1 file is the file downloaded from the link above."
+msgstr "このコマンドは、PowerShell スクリプトを実行するための実行ポリシーを一時的に緩和します。このコマンドを実行する前に、指定した .ps1 ファイルが上記のリンクからダウンロードしたファイルであることを確認してください。"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:51
-msgid "If you want to configure pyfemtet in a virtual environment (or anyway without `py launcher`), **change line 24 of the script** to the following, activate the virtual environment, and run the script from the command line: ::"
-msgstr "仮想環境で PyFemtet をセットアップしたい場合は、スクリプトの 24 行目を下記の通りに変更し、仮想環境をアクティベートしたコマンドラインでスクリプトを実行してください。"
+#: ../source/pages/installation_pages/install_pyfemtet.rst:52
+msgid "This script assumes that your Python installation includes the ``py`` launcher. If you have done a custom installation of Python, **make sure that your installation configuration includes the ``py`` launcher.**"
+msgstr "このスクリプトは Python のインストール構成に ``py`` ランチャーが含まれていることを前提としています。Python をカスタムインストールした場合は、**インストール構成に ``py`` ランチャーが含まれていることを確認してください。**"
 
-#: ../source/pages/installation_pages/install_pyfemtet.rst:61
-msgid "Check the Installation of PyFemtet"
-msgstr "PyFemtet がインストールできているか確認する"
+#: ../source/pages/installation_pages/install_pyfemtet.rst:59
+msgid "If you want to install pyfemtet in a virtual environment, or do not have the ``py`` launcher, change the ``$python_command`` assignment in the script to the following. Then activate the virtual environment and run the script from the command line: ::"
+msgstr "仮想環境に pyfemtet をインストールする場合、または ``py`` ランチャーがない場合は、スクリプト内の ``$python_command`` の代入を次のように変更してください。その後、仮想環境を有効化して、コマンドラインからスクリプトを実行してください。"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:78
+msgid "Type ``py -m pip show pyfemtet`` and press Enter. (``py -m pip show pyfemtet-opt-gui`` for the GUI tool)"
+msgstr "``py -m pip show pyfemtet`` と入力して Enter キーを押します。GUI ツールの場合は、``py -m pip show pyfemtet-opt-gui`` と入力します。"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:63
 #: ../source/pages/installation_pages/install_python.rst:39
