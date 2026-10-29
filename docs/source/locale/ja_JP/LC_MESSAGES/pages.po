@@ -445,6 +445,18 @@ msgid "If you want to install pyfemtet in a virtual environment, or do not have 
 msgstr "仮想環境に pyfemtet をインストールする場合、または ``py`` ランチャーがない場合は、スクリプト内の ``$python_command`` の代入を次のように変更してください。その後、仮想環境を有効化して、コマンドラインからスクリプトを実行してください。"
 
 #: ../source/pages/installation_pages/install_pyfemtet.rst:68
+msgid "If multiple Python versions are installed, the ``py`` command may select a different version from the one you intend to use. To select a specific version, change the ``$python_command`` assignment in the script as follows (this example selects Python 3.14): ::"
+msgstr "複数バージョンの Python がインストールされている場合、``py`` コマンドが意図したものとは異なるバージョンを選択することがあります。使用するバージョンを指定するには、スクリプト内の ``$python_command`` の代入を次のように変更してください（この例では Python 3.14 を選択します）。 ::"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:75
+msgid "Before running the script, confirm the selected version by running ``py -3.14 --version`` from a Command Prompt with administrator privileges. Replace ``3.14`` with the supported Python version you want to use."
+msgstr "スクリプトを実行する前に、管理者権限のコマンドプロンプトで ``py -3.14 --version`` を実行し、選択したバージョンを確認してください。``3.14`` は、使用したい対応範囲内の Python バージョンに置き換えてください。"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:79
+msgid "When checking the installation below, also replace ``py`` with ``py -3.14`` to check the same Python environment."
+msgstr "後述のインストール確認でも、同じ Python 環境を確認するため、``py`` を ``py -3.14`` に置き換えてください。"
+
+#: ../source/pages/installation_pages/install_pyfemtet.rst:68
 msgid "Check the Installation of PyFemtet"
 msgstr "PyFemtet がインストールできているか確認する"
 
@@ -1330,4 +1342,3 @@ msgstr "ツールの `チュートリアルモード` によってサンプル�
 
 #~ msgid "If Python starts, the setup was successful. (If you see the message \"'py' is not recognized as an internal or external command, operable program or batch file.\", it is possible that Python is not installed.)"
 #~ msgstr "Python が起動すればセットアップは成功です。 (もし 「”py” は内部コマンドまたは外部コマンド、操作可能なプログラムまたはバッチ ファイルとして認識されていません。」というメッセージが表示される場合、Python がインストールされていない可能性があります。)"
-

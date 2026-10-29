@@ -160,6 +160,21 @@ the command line:</p>
 </pre></div>
 </div>
 </div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>If multiple Python versions are installed, the <code class="docutils literal notranslate"><span class="pre">py</span></code> command may select
+a different version from the one you intend to use. To select a specific
+version, change the <code class="docutils literal notranslate"><span class="pre">$python_command</span></code> assignment in the script as follows
+(this example selects Python 3.14):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$python_command = &quot;py -3.14&quot;
+</pre></div>
+</div>
+<p>Before running the script, confirm the selected version by running
+<code class="docutils literal notranslate"><span class="pre">py</span> <span class="pre">-3.14</span> <span class="pre">--version</span></code> from a Command Prompt with administrator privileges.
+Replace <code class="docutils literal notranslate"><span class="pre">3.14</span></code> with the supported Python version you want to use.</p>
+<p>When checking the installation below, also replace <code class="docutils literal notranslate"><span class="pre">py</span></code> with
+<code class="docutils literal notranslate"><span class="pre">py</span> <span class="pre">-3.14</span></code> to check the same Python environment.</p>
+</div>
 <section id="check-the-installation-of-pyfemtet">
 <span id="check-the-installation-pyfemtet-section"></span><h2>Check the Installation of PyFemtet<a class="headerlink" href="#check-the-installation-of-pyfemtet" title="Link to this heading"></a></h2>
 <p>If you want to check the installation later, please follow the steps below.</p>

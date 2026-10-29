@@ -148,6 +148,15 @@
 </pre></div>
 </div>
 </div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>複数バージョンの Python がインストールされている場合、<code class="docutils literal notranslate"><span class="pre">py</span></code> コマンドが意図したものとは異なるバージョンを選択することがあります。使用するバージョンを指定するには、スクリプト内の <code class="docutils literal notranslate"><span class="pre">$python_command</span></code> の代入を次のように変更してください（この例では Python 3.14 を選択します）。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$python_command = &quot;py -3.14&quot;
+</pre></div>
+</div>
+<p>スクリプトを実行する前に、管理者権限のコマンドプロンプトで <code class="docutils literal notranslate"><span class="pre">py</span> <span class="pre">-3.14</span> <span class="pre">--version</span></code> を実行し、選択したバージョンを確認してください。<code class="docutils literal notranslate"><span class="pre">3.14</span></code> は、使用したい対応範囲内の Python バージョンに置き換えてください。</p>
+<p>後述のインストール確認でも、同じ Python 環境を確認するため、<code class="docutils literal notranslate"><span class="pre">py</span></code> を <code class="docutils literal notranslate"><span class="pre">py</span> <span class="pre">-3.14</span></code> に置き換えてください。</p>
+</div>
 <section id="check-the-installation-of-pyfemtet">
 <span id="check-the-installation-pyfemtet-section"></span><h2>PyFemtet がインストールできているか確認する<a class="headerlink" href="#check-the-installation-of-pyfemtet" title="Link to this heading"></a></h2>
 <p>インストールを後から確認したい場合は、以下の手順に従ってください。</p>

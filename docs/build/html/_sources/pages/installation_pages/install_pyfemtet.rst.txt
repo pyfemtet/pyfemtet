@@ -62,6 +62,23 @@ This step requires administrator privileges.
         $python_command = "python"
 
 
+.. tip::
+
+    If multiple Python versions are installed, the ``py`` command may select
+    a different version from the one you intend to use. To select a specific
+    version, change the ``$python_command`` assignment in the script as follows
+    (this example selects Python 3.14): ::
+
+        $python_command = "py -3.14"
+
+    Before running the script, confirm the selected version by running
+    ``py -3.14 --version`` from a Command Prompt with administrator privileges.
+    Replace ``3.14`` with the supported Python version you want to use.
+
+    When checking the installation below, also replace ``py`` with
+    ``py -3.14`` to check the same Python environment.
+
+
 .. _check-the-installation-pyfemtet-section:
 
 Check the Installation of PyFemtet
